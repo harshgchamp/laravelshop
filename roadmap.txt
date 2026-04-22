@@ -1,0 +1,26 @@
+Read claude.md and .claudeignore and update if any need according to project.
+
+
+Considering the deployment will be on git + aws. (EC2, rds, s3, iam roles, alb and many more)
+
+
+ Do a thorough exploration of this Laravel + Inertia + Vue 3 e-commerce admin project at D:\xampp\htdocs\ecommerce-admin. I need a complete architectural audit. Read every important file.
+
+       Please explore and report on:
+
+       1. app/ directory structure — all Controllers, Models, Requests, Middleware, Policies, Services, Observers, Events, Jobs, etc.
+       2. routes/ — all route files (web.php, api.php, etc.)
+       3. database/ — all migrations, seeders, factories
+       4. resources/js/ — Pages, Components, composables, stores (Pinia), layouts
+       5. config/ — any custom config files
+       6. composer.json and package.json — dependencies
+       7. tests/ — any test files present
+       8. Any Service classes, Repositories, DTOs, Actions
+       9. Read at least 3-4 controller files fully
+       10. Read at least 3-4 Vue page files fully
+       11. Read at least 3-4 migration files
+       12. Read the main model files
+
+       Report everything you find — file structure, code quality, patterns used, what's missing, what's done well. Be very detailed. This is for a senior 10+ year PHP developer evaluation.
+	   
+	   

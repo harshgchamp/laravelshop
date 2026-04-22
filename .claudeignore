@@ -1,0 +1,46 @@
+node_modules
+vendor
+
+storage/app
+storage/logs
+storage/framework
+bootstrap/cache
+
+.env
+.env.*
+.env.example
+
+public/storage
+public/hot
+
+*.log
+*.cache
+*.tmp
+
+dist
+build
+coverage
+
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+.phpunit.result.cache
+.php-cs-fixer.cache
+.pint.cache
+
+composer.lock
+
+# IDE / OS
+.idea
+.vscode
+*.DS_Store
+Thumbs.db
+
+# Large generated files
+public/build
+public/js/vendor.js
+
+# Test artifacts
+.phpunit.cache
+tests/coverage
