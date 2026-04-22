@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Product;
 
 class ProductStoreRequest extends FormRequest
 {
@@ -51,7 +51,7 @@ class ProductStoreRequest extends FormRequest
             'image' => [
                 'nullable',
                 'image',
-                'max:2048'
+                'max:2048',
             ],
 
             'published' => [

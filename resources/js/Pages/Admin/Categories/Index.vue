@@ -56,24 +56,23 @@ const destroy = (row) => {
 </script>
 
 <template>
-<AdminLayout>
-    <div class="card">
+    <AdminLayout>
+        <div class="card">
+            <!-- Page header: title + "New" button -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Categories</h2>
 
-        <!-- Page header: title + "New" button -->
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Categories</h2>
-
-            <!--
+                <!--
                 <Link> renders as <a> and triggers an Inertia visit (XHR) on click.
                 Wrapping <Button> in <Link> keeps PrimeVue's button styling while
                 using Inertia's navigation instead of a full page load.
             -->
-            <Link :href="route('admin.categories.create')">
-                <Button label="New" icon="pi pi-plus" />
-            </Link>
-        </div>
+                <Link :href="route('admin.categories.create')">
+                    <Button label="New" icon="pi pi-plus" />
+                </Link>
+            </div>
 
-        <!--
+            <!--
             :value="categories.data" — DataTable receives the `data` array from the
             Laravel paginator (ResourceCollection unwraps to { data, links, meta }).
 
@@ -82,52 +81,52 @@ const destroy = (row) => {
             the current page's data. For true server-side pagination, use
             @page="onPage" and re-request the server.
         -->
-        <DataTable :value="categories.data" paginator :rows="10">
+            <DataTable :value="categories.data" paginator :rows="10">
+                <!-- Row number: slotProps.index is 0-based within the current page -->
+                <Column header="#">
+                    <template #body="slotProps">
+                        {{ slotProps.index + 1 }}
+                    </template>
+                </Column>
 
-            <!-- Row number: slotProps.index is 0-based within the current page -->
-            <Column header="#">
-                <template #body="slotProps">
-                    {{ slotProps.index + 1 }}
-                </template>
-            </Column>
+                <!-- field="name" / field="slug" — DataTable reads directly from each row object -->
+                <Column field="name" header="Name" />
+                <Column field="slug" header="Slug" />
 
-            <!-- field="name" / field="slug" — DataTable reads directly from each row object -->
-            <Column field="name" header="Name" />
-            <Column field="slug" header="Slug" />
+                <!-- Boolean status column — displays human-readable "Active" / "Inactive" -->
+                <Column header="Status">
+                    <template #body="slotProps">
+                        <span
+                            :class="
+                                slotProps.data.status
+                                    ? 'text-green-600 font-medium'
+                                    : 'text-gray-400'
+                            "
+                        >
+                            {{ slotProps.data.status ? 'Active' : 'Inactive' }}
+                        </span>
+                    </template>
+                </Column>
 
-            <!-- Boolean status column — displays human-readable "Active" / "Inactive" -->
-            <Column header="Status">
-                <template #body="slotProps">
-                    <span
-                        :class="slotProps.data.status
-                            ? 'text-green-600 font-medium'
-                            : 'text-gray-400'"
-                    >
-                        {{ slotProps.data.status ? 'Active' : 'Inactive' }}
-                    </span>
-                </template>
-            </Column>
-
-            <!-- Actions: Edit (navigate) + Delete (confirm then destroy) -->
-            <Column header="Actions">
-                <template #body="slotProps">
-                    <div class="flex items-center gap-2">
-                        <Link :href="route('admin.categories.edit', slotProps.data.id)">
-                            <Button label="Edit" icon="pi pi-pencil" outlined size="small" />
-                        </Link>
-                        <Button
-                            label="Delete"
-                            icon="pi pi-trash"
-                            outlined
-                            severity="danger"
-                            size="small"
-                            @click="destroy(slotProps.data)"
-                        />
-                    </div>
-                </template>
-            </Column>
-
-        </DataTable>
-    </div>
-</AdminLayout>
+                <!-- Actions: Edit (navigate) + Delete (confirm then destroy) -->
+                <Column header="Actions">
+                    <template #body="slotProps">
+                        <div class="flex items-center gap-2">
+                            <Link :href="route('admin.categories.edit', slotProps.data.id)">
+                                <Button label="Edit" icon="pi pi-pencil" outlined size="small" />
+                            </Link>
+                            <Button
+                                label="Delete"
+                                icon="pi pi-trash"
+                                outlined
+                                severity="danger"
+                                size="small"
+                                @click="destroy(slotProps.data)"
+                            />
+                        </div>
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+    </AdminLayout>
 </template>

@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Inertia\Inertia;
-use App\Models\Permission;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PermissionIndexRequest;
 use App\Http\Requests\Admin\PermissionStoreRequest;
 use App\Http\Requests\Admin\PermissionUpdateRequest;
-use App\Http\Controllers\Controller;
+use App\Models\Permission;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class PermissionController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      *
@@ -32,7 +30,7 @@ class PermissionController extends Controller
         }
 
         // Safe Sorting
-        $allowedFields = ['name', 'guard_name' ];
+        $allowedFields = ['name', 'guard_name'];
         $allowedOrders = ['asc', 'desc'];
 
         $field = in_array($request->field, $allowedFields)
@@ -52,22 +50,23 @@ class PermissionController extends Controller
         ]);
     }
 
-
     public function store(PermissionStoreRequest $request)
     {
         DB::beginTransaction();
         try {
             $permission = Permission::create([
-                'name'          => $request->name
+                'name' => $request->name,
             ]);
             DB::commit();
+
             return redirect()
                 ->route('admin.permissions.index')
                 ->with('success', 'Permission created successfully');
             // return back()->with('success', $permission->name. ' created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', 'Error creating ' .  $th->getMessage());
+
+            return back()->with('error', 'Error creating '.$th->getMessage());
         }
     }
 
@@ -76,32 +75,36 @@ class PermissionController extends Controller
         DB::beginTransaction();
         try {
             $permission->update([
-                'name'          => $request->name
+                'name' => $request->name,
             ]);
             DB::commit();
+
             return redirect()
                 ->route('admin.permissions.index')
                 ->with('success', 'Permission updated successfully');
             // return back()->with('success',  $permission->name. ' updated successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', 'Error updating ' .  $th->getMessage());
+
+            return back()->with('error', 'Error updating '.$th->getMessage());
         }
     }
 
     public function destroy(Permission $permission)
     {
-            DB::beginTransaction();
-            try {
-                $permission->delete();
-                DB::commit();
-                return redirect()
-                    ->route('admin.permissions.index')
-                    ->with('success', 'Permission deleted successfully');
-                // return back()->with('success', $permission->name. ' deleted successfully.');
-            } catch (\Throwable $th) {
-                DB::rollback();
-                return back()->with('error', 'Error deleting ' . $permission->name . $th->getMessage());
-            }
+        DB::beginTransaction();
+        try {
+            $permission->delete();
+            DB::commit();
+
+            return redirect()
+                ->route('admin.permissions.index')
+                ->with('success', 'Permission deleted successfully');
+            // return back()->with('success', $permission->name. ' deleted successfully.');
+        } catch (\Throwable $th) {
+            DB::rollback();
+
+            return back()->with('error', 'Error deleting '.$permission->name.$th->getMessage());
+        }
     }
 }

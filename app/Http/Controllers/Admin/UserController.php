@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller; 
-use Spatie\Permission\Models\Role;
-use Inertia\Inertia;
-use App\Models\User;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserIndexRequest;
 use App\Http\Requests\Admin\UserStoreRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
 use App\Http\Resources\Admin\UserResource;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
-{   
+{
     public function index(UserIndexRequest $request)
     {
         $query = User::query();
@@ -25,13 +25,14 @@ class UserController extends Controller
             ->withQueryString();
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => UserResource::collection($users), 
+            'users' => UserResource::collection($users),
         ]);
     }
 
     public function create()
     {
         $roles = Role::all();
+
         return Inertia::render('Admin/Users/Create', [
             'roles' => $roles,
         ]);
@@ -48,28 +49,30 @@ class UserController extends Controller
             ]);
             $user->assignRole($request->role);
             DB::commit();
+
             return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'User created successfully');
+                ->route('admin.users.index')
+                ->with('success', 'User created successfully');
             // return back()->with('success', $user->name. ' created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', 'Error creating user: ' . $th->getMessage());
+
+            return back()->with('error', 'Error creating user: '.$th->getMessage());
         }
     }
 
     public function edit(User $user)
     {
-        $roles = Role::all(); 
+        $roles = Role::all();
+
         return Inertia::render('Admin/Users/Edit', [
             'user' => (new UserResource($user))->resolve(),
             'roles' => $roles,
         ]);
     }
 
-
     public function update(UserUpdateRequest $request, User $user)
-    { 
+    {
         DB::beginTransaction();
         try {
             $user->update([
@@ -79,16 +82,17 @@ class UserController extends Controller
             ]);
             $user->syncRoles([$request->role]);
             DB::commit();
+
             return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'User updated successfully');
+                ->route('admin.users.index')
+                ->with('success', 'User updated successfully');
             // return back()->with('success', $user->name. ' updated successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', 'Error updating ' . $user->name . $th->getMessage());
+
+            return back()->with('error', 'Error updating '.$user->name.$th->getMessage());
         }
     }
-
 
     public function destroy(User $user)
     {

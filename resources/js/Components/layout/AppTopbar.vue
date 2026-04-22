@@ -28,22 +28,18 @@ const logout = () => {
 
 <template>
     <header class="bg-white dark:bg-gray-800 shadow px-6 py-4 flex justify-between items-center">
-
         <!-- Welcome message — shows the authenticated user's display name -->
-        <h1 class="font-semibold text-gray-800 dark:text-white">
-            Welcome, {{ user.name }}
-        </h1>
+        <h1 class="font-semibold text-gray-800 dark:text-white">Welcome, {{ user.name }}</h1>
 
         <div class="flex items-center gap-4">
-
             <!--
                 "View Website" button — navigates to the public storefront.
                 pi pi-external-link icon signals "opens a different section".
                 router.get('/') is an Inertia visit — no full page reload.
             -->
             <button
-                @click="router.get(route('home'))"
                 class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                @click="router.get(route('home'))"
             >
                 <i class="pi pi-external-link" />
                 Website
@@ -54,13 +50,12 @@ const logout = () => {
                 pi pi-sign-out: door-with-arrow icon, universally recognised for logout.
             -->
             <button
-                @click="logout"
                 class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                @click="logout"
             >
                 <i class="pi pi-sign-out" />
                 Logout
             </button>
-
         </div>
     </header>
 </template>

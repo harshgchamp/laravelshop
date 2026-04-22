@@ -59,15 +59,15 @@ const props = defineProps({
  *    Use computed() for UI-only derived values.
  */
 const form = useForm({
-    name:        '',
+    name: '',
     description: '',
-    image:       null,   // holds the File object when the user picks an image
-    status:      true,   // defaults to active for new categories
-    _method:     props.method === 'put' ? 'put' : 'post', // Laravel method spoofing
+    image: null, // holds the File object when the user picks an image
+    status: true, // defaults to active for new categories
+    _method: props.method === 'put' ? 'put' : 'post', // Laravel method spoofing
 });
 
 // UI-only label: "Created" after store, "Updated" after update — never sent to server
-const methodText = computed(() => props.method === 'put' ? 'Updated' : 'Created');
+const methodText = computed(() => (props.method === 'put' ? 'Updated' : 'Created'));
 
 // Holds the URL for the image preview (either the existing image URL or a blob: URL)
 const preview = ref(null);
@@ -89,10 +89,10 @@ watch(
     () => props.category,
     (category) => {
         if (category) {
-            form.name        = category.name;
+            form.name = category.name;
             form.description = category.description;
-            form.status      = Boolean(category.status); // ensure true/false, not 1/0
-            preview.value    = category.image;           // full URL from CategoryResource
+            form.status = Boolean(category.status); // ensure true/false, not 1/0
+            preview.value = category.image; // full URL from CategoryResource
         }
     },
     { immediate: true }, // run immediately on mount, not just on future changes
@@ -109,8 +109,8 @@ watch(
  */
 const onImageSelect = (event) => {
     const file = event.files[0];
-    form.image = file;                           // store File object in form for upload
-    preview.value = URL.createObjectURL(file);   // generate blob: URL for <img> preview
+    form.image = file; // store File object in form for upload
+    preview.value = URL.createObjectURL(file); // generate blob: URL for <img> preview
 };
 
 // ─── Submit ──────────────────────────────────────────────────────────────────
@@ -151,82 +151,92 @@ const submit = () => {
 </script>
 
 <template>
-<div class="card bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+    <div class="card bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <!-- Name field — required, drives the auto-generated slug via Spatie HasSlug -->
+        <div class="mb-4">
+            <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">Name</label>
 
-    <!-- Name field — required, drives the auto-generated slug via Spatie HasSlug -->
-    <div class="mb-4">
-        <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">Name</label>
-
-        <!--
+            <!--
             v-model="form.name" — two-way binding: updates form.name on every keystroke.
             class="w-full" — PrimeVue InputText supports Tailwind classes directly.
         -->
-        <InputText v-model="form.name" class="w-full" placeholder="e.g. Electronics" />
+            <InputText v-model="form.name" class="w-full" placeholder="e.g. Electronics" />
 
-        <!-- form.errors.name is populated by Inertia after a failed server validation -->
-        <small v-if="form.errors.name" class="text-red-500 mt-1 block">
-            {{ form.errors.name }}
-        </small>
-    </div>
+            <!-- form.errors.name is populated by Inertia after a failed server validation -->
+            <small v-if="form.errors.name" class="text-red-500 mt-1 block">
+                {{ form.errors.name }}
+            </small>
+        </div>
 
-    <!-- Description — optional, nullable in DB and validation rules -->
-    <div class="mb-4">
-        <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">Description</label>
-        <Textarea v-model="form.description" rows="4" class="w-full" placeholder="Optional description..." />
-    </div>
+        <!-- Description — optional, nullable in DB and validation rules -->
+        <div class="mb-4">
+            <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200"
+                >Description</label
+            >
+            <Textarea
+                v-model="form.description"
+                rows="4"
+                class="w-full"
+                placeholder="Optional description..."
+            />
+        </div>
 
-    <!-- Image upload with live preview -->
-    <div class="mb-4">
-        <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">Image</label>
+        <!-- Image upload with live preview -->
+        <div class="mb-4">
+            <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">Image</label>
 
-        <!--
+            <!--
             FileUpload (mode="basic") renders a single "Choose Image" button.
             :auto="false" → does NOT upload immediately on selection — we upload with the form.
             accept="image/*" → browser file picker filter (MIME validation is on the server too).
             @select="onImageSelect" → our handler stores the File and creates a preview URL.
         -->
-        <FileUpload
-            mode="basic"
-            accept="image/*"
-            :auto="false"
-            chooseLabel="Choose Image"
-            @select="onImageSelect"
-        />
+            <FileUpload
+                mode="basic"
+                accept="image/*"
+                :auto="false"
+                choose-label="Choose Image"
+                @select="onImageSelect"
+            />
 
-        <!--
+            <!--
             v-if="preview" — only show the preview img when a URL exists.
             On Create: preview is null until a file is selected.
             On Edit: preview starts as the existing image URL from CategoryResource.
         -->
-        <div v-if="preview" class="mt-3">
-            <img :src="preview" class="h-32 rounded shadow object-cover" alt="Category preview" />
+            <div v-if="preview" class="mt-3">
+                <img
+                    :src="preview"
+                    class="h-32 rounded shadow object-cover"
+                    alt="Category preview"
+                />
+            </div>
+
+            <small v-if="form.errors.image" class="text-red-500 mt-1 block">
+                {{ form.errors.image }}
+            </small>
         </div>
 
-        <small v-if="form.errors.image" class="text-red-500 mt-1 block">
-            {{ form.errors.image }}
-        </small>
-    </div>
-
-    <!-- Status toggle — active (true) shows category on storefront, inactive (false) hides it -->
-    <div class="mb-6 flex items-center gap-3">
-        <!--
+        <!-- Status toggle — active (true) shows category on storefront, inactive (false) hides it -->
+        <div class="mb-6 flex items-center gap-3">
+            <!--
             InputSwitch is PrimeVue's toggle switch — binds to a boolean.
             v-model="form.status" sends 1 (true) or 0 (false) to Laravel.
             Laravel's `boolean` validation rule accepts true/false/1/0.
         -->
-        <InputSwitch v-model="form.status" />
-        <span class="text-gray-700 dark:text-gray-200">Active</span>
-    </div>
+            <InputSwitch v-model="form.status" />
+            <span class="text-gray-700 dark:text-gray-200">Active</span>
+        </div>
 
-    <!--
+        <!--
         :loading="form.processing" disables the button and shows a spinner while
         the XHR request is in-flight — prevents double submissions.
     -->
-    <Button
-        label="Save Category"
-        icon="pi pi-check"
-        :loading="form.processing"
-        @click="submit"
-    />
-</div>
+        <Button
+            label="Save Category"
+            icon="pi pi-check"
+            :loading="form.processing"
+            @click="submit"
+        />
+    </div>
 </template>

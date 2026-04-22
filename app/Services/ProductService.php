@@ -40,14 +40,14 @@ class ProductService
     /**
      * Return a paginated, eager-loaded product list with optional dynamic sorting.
      *
-     * @param  string  $field    Sort column (validated against SORTABLE_FIELDS)
-     * @param  string  $order    'asc' or 'desc'
-     * @param  int     $perPage  Rows per page
+     * @param  string  $field  Sort column (validated against SORTABLE_FIELDS)
+     * @param  string  $order  'asc' or 'desc'
+     * @param  int  $perPage  Rows per page
      */
     public function list(
-        string $field   = 'created_at',
-        string $order   = 'desc',
-        int    $perPage = 10,
+        string $field = 'created_at',
+        string $order = 'desc',
+        int $perPage = 10,
     ): LengthAwarePaginator {
         // Reject any field not in the whitelist — fall back to created_at
         $sortField = in_array($field, self::SORTABLE_FIELDS, strict: true) ? $field : 'created_at';

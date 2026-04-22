@@ -5,7 +5,6 @@ namespace App\Helper;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 
 class Cart
@@ -17,7 +16,7 @@ class Cart
         } else {
             return array_reduce(
                 self::getCookieCartItems(),
-                fn($carry, $item) => $carry + $item['quantity'],
+                fn ($carry, $item) => $carry + $item['quantity'],
                 0
             );
         }
@@ -26,7 +25,7 @@ class Cart
     public static function getCartItems()
     {
         if ($user = auth()->id()) {
-            return CartItem::whereUserId($user)->get()->map(fn(CartItem $item) => ['product_id' => $item->product_id, 'quantity' => $item->quantity]);
+            return CartItem::whereUserId($user)->get()->map(fn (CartItem $item) => ['product_id' => $item->product_id, 'quantity' => $item->quantity]);
         } else {
             return self::getCookieCartItems();
         }
@@ -38,7 +37,7 @@ class Cart
     }
 
     public static function setCookieCartItems(array $cartItems)
-    { 
+    {
         Cookie::queue('cart_items_hghg', json_encode($cartItems), 60 * 24 * 30);
     }
 
@@ -50,6 +49,7 @@ class Cart
         foreach (self::getCookieCartItems() as $cartItem) {
             if (isset($userCartItems[$cartItem['product_id']])) {
                 $userCartItems[$cartItem['product_id']]->update(['quantity' => $cartItem['quantity']]);
+
                 continue;
             }
             $savedCartItems[] = [
@@ -58,7 +58,7 @@ class Cart
                 'quantity' => $cartItem['quantity'],
             ];
         }
-        if (!empty($savedCartItems)) {
+        if (! empty($savedCartItems)) {
             CartItem::insert($savedCartItems);
         }
     }
@@ -75,7 +75,7 @@ class Cart
                 'product_id' => $cartItem['product_id'],
             ])->first();
 
-            if (!$existingCartItem) {
+            if (! $existingCartItem) {
                 // Only insert if it doesn't already exist
                 $newCartItems[] = [
                     'user_id' => $request->user()->id,
@@ -85,13 +85,11 @@ class Cart
             }
         }
 
-
-        if (!empty($newCartItems)) {
+        if (! empty($newCartItems)) {
             // Insert the new cart items into the database
             CartItem::insert($newCartItems);
         }
     }
-
 
     public static function getProductsAndCartItems()
     {
@@ -99,6 +97,7 @@ class Cart
         $ids = Arr::pluck($cartItems, 'product_id');
         $products = Product::whereIn('id', $ids)->get();
         $cartItems = Arr::keyBy($cartItems, 'product_id');
+
         return [$products, $cartItems];
     }
 }

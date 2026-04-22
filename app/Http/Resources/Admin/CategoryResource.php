@@ -27,25 +27,25 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
+            'id' => $this->id,
+            'name' => $this->name,
 
             // Slug is used for SEO-friendly URLs: /category/{slug}
-            'slug'        => $this->slug,
+            'slug' => $this->slug,
 
             'description' => $this->description,
 
             // Convert the stored relative path ("categories/abc.jpg") to a full public URL.
             // asset('storage/...') prepends APP_URL — works locally and on EC2/CloudFront.
             // Returns null when no image was uploaded — the Vue component shows a placeholder.
-            'image'       => $this->image ? asset('storage/' . $this->image) : null,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
 
             // Boolean — active (true) or inactive (false) — drives visibility on the storefront.
-            'status'      => $this->status,
+            'status' => $this->status,
 
             // Human-readable date for the admin table. null-safe because created_at is
             // technically nullable in Eloquent even though the DB always sets it.
-            'created_at'  => $this->created_at?->format('Y-m-d'),
+            'created_at' => $this->created_at?->format('Y-m-d'),
         ];
     }
 }

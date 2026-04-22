@@ -7,7 +7,6 @@ use App\Models\Order;
 use App\Models\UserAddress;
 use Inertia\Inertia;
 
-
 class AccountOrderController extends Controller
 {
     public function index()
@@ -24,7 +23,7 @@ class AccountOrderController extends Controller
 
         return Inertia::render('Front/Account/Orders/Index', [
             'orders' => $orders,
-            'user' => auth()->user()
+            'user' => auth()->user(),
         ]);
     }
 
@@ -32,21 +31,21 @@ class AccountOrderController extends Controller
     {
         // Ensure the order belongs to the authenticated user
         if ($order->paymentAddress->user_id !== auth()->id()) {
-          abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized');
         }
 
         $order->load([
             'items.product',
             'paymentAddress',
-            'paymentDetails'
+            'paymentDetails',
 
         ]);
-        
-          //  dd($order->toArray());
+
+        //  dd($order->toArray());
 
         return Inertia::render('Front/Account/Orders/Show', [
             'order' => $order,
-            'user' => auth()->user()
+            'user' => auth()->user(),
         ]);
     }
 }

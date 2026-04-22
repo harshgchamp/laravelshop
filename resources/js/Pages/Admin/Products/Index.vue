@@ -43,65 +43,64 @@ const destroy = (row) => {
 </script>
 
 <template>
-<AdminLayout>
-    <div class="card">
+    <AdminLayout>
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Products</h2>
+                <Link :href="route('admin.products.create')">
+                    <Button label="New" icon="pi pi-plus" />
+                </Link>
+            </div>
 
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Products</h2>
-            <Link :href="route('admin.products.create')">
-                <Button label="New" icon="pi pi-plus" />
-            </Link>
+            <DataTable :value="products.data" paginator :rows="10">
+                <Column header="#">
+                    <template #body="slotProps">
+                        {{ slotProps.index + 1 }}
+                    </template>
+                </Column>
+
+                <!-- `title` is the product identifier — products do NOT have a `name` field -->
+                <Column field="title" header="Title" />
+                <Column field="slug" header="Slug" />
+                <Column field="quantity" header="Qty" />
+
+                <!-- Price comes as a float from ProductResource — template displays as-is -->
+                <Column field="price" header="Price (£)" />
+                <Column field="discount_price" header="Discount (£)" />
+
+                <!-- `published` boolean — controls storefront visibility -->
+                <Column header="Published">
+                    <template #body="slotProps">
+                        <span
+                            :class="
+                                slotProps.data.published
+                                    ? 'text-green-600 font-medium'
+                                    : 'text-gray-400'
+                            "
+                        >
+                            {{ slotProps.data.published ? 'Yes' : 'No' }}
+                        </span>
+                    </template>
+                </Column>
+
+                <Column header="Actions">
+                    <template #body="slotProps">
+                        <div class="flex items-center gap-2">
+                            <Link :href="route('admin.products.edit', slotProps.data.id)">
+                                <Button label="Edit" icon="pi pi-pencil" outlined size="small" />
+                            </Link>
+                            <Button
+                                label="Delete"
+                                icon="pi pi-trash"
+                                outlined
+                                severity="danger"
+                                size="small"
+                                @click="destroy(slotProps.data)"
+                            />
+                        </div>
+                    </template>
+                </Column>
+            </DataTable>
         </div>
-
-        <DataTable :value="products.data" paginator :rows="10">
-
-            <Column header="#">
-                <template #body="slotProps">
-                    {{ slotProps.index + 1 }}
-                </template>
-            </Column>
-
-            <!-- `title` is the product identifier — products do NOT have a `name` field -->
-            <Column field="title" header="Title" />
-            <Column field="slug" header="Slug" />
-            <Column field="quantity" header="Qty" />
-
-            <!-- Price comes as a float from ProductResource — template displays as-is -->
-            <Column field="price" header="Price (£)" />
-            <Column field="discount_price" header="Discount (£)" />
-
-            <!-- `published` boolean — controls storefront visibility -->
-            <Column header="Published">
-                <template #body="slotProps">
-                    <span
-                        :class="slotProps.data.published
-                            ? 'text-green-600 font-medium'
-                            : 'text-gray-400'"
-                    >
-                        {{ slotProps.data.published ? 'Yes' : 'No' }}
-                    </span>
-                </template>
-            </Column>
-
-            <Column header="Actions">
-                <template #body="slotProps">
-                    <div class="flex items-center gap-2">
-                        <Link :href="route('admin.products.edit', slotProps.data.id)">
-                            <Button label="Edit" icon="pi pi-pencil" outlined size="small" />
-                        </Link>
-                        <Button
-                            label="Delete"
-                            icon="pi pi-trash"
-                            outlined
-                            severity="danger"
-                            size="small"
-                            @click="destroy(slotProps.data)"
-                        />
-                    </div>
-                </template>
-            </Column>
-
-        </DataTable>
-    </div>
-</AdminLayout>
+    </AdminLayout>
 </template>

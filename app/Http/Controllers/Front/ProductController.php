@@ -3,12 +3,9 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Product;
 use App\Http\Resources\Admin\ProductResource;
+use App\Models\Product;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
-
 
 class ProductController extends Controller
 {
@@ -20,10 +17,8 @@ class ProductController extends Controller
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('published', 1)
-            ->inRandomOrder() 
+            ->inRandomOrder()
             ->get();
-
-       
 
         return Inertia::render('Front/ProductDetail', [
             'product' => (new ProductResource($product))->resolve(),

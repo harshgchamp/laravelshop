@@ -2,57 +2,49 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Product;
-use App\Models\CartItem;
 use App\Helper\Cart;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\Front\CartResource;
-use Inertia\Inertia;
+use App\Models\CartItem;
+use App\Models\Product;
 use App\Models\UserAddress;
-
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CartController extends Controller
 {
-
     public function view(Request $request)
     {
         $user = $request->user();
-
 
         if ($user) {
             $cartItems = CartItem::with('product')
                 ->where('user_id', $user->id)
                 ->get();
 
-                 
-
             $userAddress = UserAddress::where('user_id', $user->id)
                 ->where('is_main', true)
                 ->first();
-            
-            
 
-            if ($cartItems->isEmpty()) { 
+            if ($cartItems->isEmpty()) {
                 return redirect('/');
-            } 
- 
+            }
+
             return Inertia::render('Front/Cart', [
                 'cartItems' => new CartResource(Cart::getProductsAndCartItems()),
-                'userAddress' => $userAddress
+                'userAddress' => $userAddress,
             ]);
         }
 
         // Guest user
         $cartItems = Cart::getCookieCartItems();
-        
 
         if (empty($cartItems)) {
             return redirect('/');
         }
 
         return Inertia::render('Front/Cart', [
-            'cartItems' => new CartResource(Cart::getProductsAndCartItems())
+            'cartItems' => new CartResource(Cart::getProductsAndCartItems()),
         ]);
     }
 
@@ -74,7 +66,7 @@ class CartController extends Controller
             }
         } else {
             $cartItems = Cart::getCookieCartItems();
-            
+
             $isProductExists = false;
             foreach ($cartItems as &$item) {
                 if ($item['product_id'] === $product->id) {
@@ -84,7 +76,7 @@ class CartController extends Controller
                 }
             }
 
-            if (!$isProductExists) {
+            if (! $isProductExists) {
                 $cartItems[] = [
                     'user_id' => null,
                     'product_id' => $product->id,
@@ -92,7 +84,6 @@ class CartController extends Controller
                     'price' => $product->discount_price ?? $product->price,
                 ];
             }
-            
 
             Cart::setCookieCartItems($cartItems);
         }
@@ -103,12 +94,12 @@ class CartController extends Controller
     public function update(Request $request, Product $product)
     {
         $quantity = $request->integer('quantity');
-        $user = $request->user(); 
+        $user = $request->user();
         if ($user) {
             CartItem::where(['user_id' => $user->id, 'product_id' => $product->id])->update(['quantity' => $quantity]);
         } else {
-            $cartItems = Cart::getCookieCartItems(); 
-           
+            $cartItems = Cart::getCookieCartItems();
+
             foreach ($cartItems as &$item) {
                 if ($item['product_id'] === $product->id) {
                     $item['quantity'] = $quantity;
@@ -120,6 +111,7 @@ class CartController extends Controller
 
         return redirect()->back();
     }
+
     public function delete(Request $request, Product $product)
     {
         $user = $request->user();

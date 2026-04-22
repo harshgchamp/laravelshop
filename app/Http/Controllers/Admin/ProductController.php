@@ -50,8 +50,8 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         // Use null-coalescing defaults: query params are optional, not required
-        $field   = $validated['field']   ?? 'created_at';
-        $order   = $validated['order']   ?? 'desc';
+        $field = $validated['field'] ?? 'created_at';
+        $order = $validated['order'] ?? 'desc';
         $perPage = (int) ($validated['perPage'] ?? 10);
 
         $products = $this->productService->list($field, $order, $perPage);
@@ -116,7 +116,7 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return Inertia::render('Admin/Products/Edit', [
-            'product'    => (new ProductResource($product))->resolve(),
+            'product' => (new ProductResource($product))->resolve(),
             'categories' => Category::select('id', 'name')->get(),
         ]);
     }

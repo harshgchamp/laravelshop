@@ -7,7 +7,7 @@
 // Both stylesheets are loaded on every page (admin + storefront) because Vite
 // has a single entry point. If performance becomes critical, split into two
 // entry points: one for admin, one for front — and load separately in Blade.
-import '../css/app.css';   // PrimeVue Aura theme overrides + Tailwind base
+import '../css/app.css'; // PrimeVue Aura theme overrides + Tailwind base
 import '../css/front.css'; // Storefront-specific styles (carousel, hero, etc.)
 
 // ─── Axios Bootstrap ─────────────────────────────────────────────────────────
@@ -40,8 +40,8 @@ import { createPinia } from 'pinia';
 
 // ─── PrimeVue UI Library ─────────────────────────────────────────────────────
 import PrimeVue from 'primevue/config';
-import Aura from '@primevue/themes/aura';          // Aura: PrimeVue's default design token set
-import ToastService from 'primevue/toastservice';  // Enables useToast() composable project-wide
+import Aura from '@primevue/themes/aura'; // Aura: PrimeVue's default design token set
+import ToastService from 'primevue/toastservice'; // Enables useToast() composable project-wide
 import ConfirmationService from 'primevue/confirmationservice'; // Enables useConfirm() project-wide
 
 // ─── App Name ────────────────────────────────────────────────────────────────
@@ -58,10 +58,7 @@ createInertiaApp({
     // the matching .vue file from Pages/. import.meta.glob pre-loads all page
     // components as lazy chunks — Vite code-splits each page automatically.
     resolve: (name) =>
-        resolvePageComponent(
-            `./Pages/${name}.vue`,
-            import.meta.glob('./Pages/**/*.vue'),
-        ),
+        resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
 
     // setup: called once when Inertia mounts. Receives:
     //  el     → the DOM element to mount onto (the <div id="app"> in app.blade.php)
@@ -69,22 +66,24 @@ createInertiaApp({
     //  props  → server-side shared props (auth, flash, ziggy, etc.)
     //  plugin → Inertia's Vue plugin (handles page transitions and history)
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)              // Inertia plugin — intercepts Link clicks, XHR navigation
-            .use(createPinia())       // Pinia — must be installed before any store is used
-            .use(ZiggyVue)            // Ziggy — registers route() globally (window + globalProperties)
-            // Register Link and Head as global components so every .vue file can use
-            // <Link href="..."> and <Head title="..."> without importing them individually.
-            .component('Link', Link)
-            .component('Head', Head)
-            .use(PrimeVue, {
-                theme: {
-                    preset: Aura,     // Aura design system — tokens for colours, spacing, radius
-                },
-            })
-            .use(ToastService)        // Required to call useToast() in any component
-            .use(ConfirmationService) // Required to call useConfirm() in any component
-            .mount(el);
+        return (
+            createApp({ render: () => h(App, props) })
+                .use(plugin) // Inertia plugin — intercepts Link clicks, XHR navigation
+                .use(createPinia()) // Pinia — must be installed before any store is used
+                .use(ZiggyVue) // Ziggy — registers route() globally (window + globalProperties)
+                // Register Link and Head as global components so every .vue file can use
+                // <Link href="..."> and <Head title="..."> without importing them individually.
+                .component('Link', Link)
+                .component('Head', Head)
+                .use(PrimeVue, {
+                    theme: {
+                        preset: Aura, // Aura design system — tokens for colours, spacing, radius
+                    },
+                })
+                .use(ToastService) // Required to call useToast() in any component
+                .use(ConfirmationService) // Required to call useConfirm() in any component
+                .mount(el)
+        );
     },
 
     // progress: thin loading bar shown at the top during Inertia page transitions.

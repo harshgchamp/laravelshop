@@ -2,11 +2,9 @@
 
 namespace App\Http\Resources\Front;
 
+use App\Helper\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Helper\Cart;
-use App\Http\Resources\Admin\ProductResource;
-use App\Models\Product;
 
 class CartResource extends JsonResource
 {
@@ -15,8 +13,6 @@ class CartResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-
-
     public function toArray(Request $request): array
     {
         $products = $this->resource[0] ?? collect();
@@ -29,14 +25,14 @@ class CartResource extends JsonResource
             $quantity = $cart['quantity'] ?? 1;
             $price = $product->discount_price ?? $product->price;
 
-            $total += (float)$price * (int)$quantity;
+            $total += (float) $price * (int) $quantity;
 
             return [
                 'id' => $product->id,
                 'title' => $product->title,
                 'price' => $price,
                 'quantity' => $quantity,
-                'image' => $product->image ? asset('storage/' . $product->image) : null,
+                'image' => $product->image ? asset('storage/'.$product->image) : null,
             ];
         });
 

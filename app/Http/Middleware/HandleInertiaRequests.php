@@ -2,11 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Helper\Cart;
+use App\Http\Resources\Front\CartResource;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
-use App\Http\Resources\Front\CartResource;
-use App\Helper\Cart;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -38,8 +38,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error'   => fn() => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
             'cartCount' => Cart::getCount(),
             'cart' => new CartResource(Cart::getProductsAndCartItems()),
@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
-            ], 
+            ],
         ];
     }
 }

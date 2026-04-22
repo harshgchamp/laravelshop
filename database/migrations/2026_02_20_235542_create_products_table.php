@@ -1,10 +1,9 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\User;
-use App\Models\Category;
 
 return new class extends Migration
 {
@@ -23,13 +22,13 @@ return new class extends Migration
             $table->unsignedInteger('quantity')->default(0);
 
             $table->longText('description')->nullable();
-            $table->string('image',100)->nullable();
+            $table->string('image', 100)->nullable();
 
             $table->boolean('published')->default(false);
             $table->boolean('in_stock')->default(0);
 
             $table->decimal('price', 10, 2)->unsigned();
-            
+
             $table->decimal('discount_price', 10, 2)->unsigned()->nullable();
 
             // Category

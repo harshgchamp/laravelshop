@@ -13,22 +13,20 @@ import CategoryForm from './Partials/CategoryForm.vue';
 </script>
 
 <template>
-<AdminLayout>
+    <AdminLayout>
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Create Category</h1>
+        </div>
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Create Category</h1>
-    </div>
-
-    <!--
+        <!--
         :category="null"  → tells CategoryForm this is a new record (no data to prefill).
         :submit-url       → the named route URL that CategoryForm will POST to.
         method="post"     → used inside CategoryForm to set Laravel's _method spoofing field.
     -->
-    <CategoryForm
-        :category="null"
-        :submit-url="route('admin.categories.store')"
-        method="post"
-    />
-
-</AdminLayout>
+        <CategoryForm
+            :category="null"
+            :submit-url="route('admin.categories.store')"
+            method="post"
+        />
+    </AdminLayout>
 </template>

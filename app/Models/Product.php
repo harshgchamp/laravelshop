@@ -14,8 +14,9 @@ use Spatie\Sluggable\SlugOptions;
 class Product extends Model
 {
     use HasFactory;
-    use SoftDeletes; // migration has softDeletes() — delete() sets deleted_at, record stays in DB
-    use HasSlug;     // auto-generates slug from `title` on create/update
+    // migration has softDeletes() — delete() sets deleted_at, record stays in DB
+    use HasSlug;
+    use SoftDeletes;     // auto-generates slug from `title` on create/update
 
     /**
      * Mass-assignable columns.

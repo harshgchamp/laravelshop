@@ -1,6 +1,8 @@
-<script setup> 
-import { Head } from '@inertiajs/vue3';
+<script setup>
+// Checkout.vue — stub page, checkout flow is handled inside Cart.vue
+// This route exists in web.php but the full UI is pending implementation.
 </script>
 
-<template> 
+<template>
+    <div></div>
 </template>

@@ -48,8 +48,8 @@ watch(
             toast.add({
                 severity: 'success', // green colour scheme
                 summary: 'Success',
-                detail: message,     // e.g. "Category created successfully."
-                life: 3000,          // auto-dismiss after 3 seconds
+                detail: message, // e.g. "Category created successfully."
+                life: 3000, // auto-dismiss after 3 seconds
             });
         }
     },
@@ -72,42 +72,39 @@ watch(
 </script>
 
 <template>
-<!--
+    <!--
     Full-height flex container: sidebar takes fixed width, main area fills the rest.
     overflow-hidden on the wrapper prevents double scrollbars — only <main> scrolls.
 -->
-<div class="layout-wrapper flex h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="layout-wrapper flex h-screen bg-gray-100 dark:bg-gray-900">
+        <!-- Fixed-width collapsible sidebar (width managed internally by AppSidebar) -->
+        <AppSidebar />
 
-    <!-- Fixed-width collapsible sidebar (width managed internally by AppSidebar) -->
-    <AppSidebar />
-
-    <!-- Right column: topbar + scrollable page content -->
-    <div class="flex flex-col flex-1 overflow-hidden">
-
-        <!--
+        <!-- Right column: topbar + scrollable page content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!--
             Toast: the floating notification overlay. Positioned top-right by default.
             Must be inside the layout so it's above the page content in the DOM.
         -->
-        <Toast />
+            <Toast />
 
-        <!--
+            <!--
             ConfirmDialog: the "Are you sure?" modal triggered by useConfirm().require().
             Rendered here once so every delete button in the admin works out of the box.
         -->
-        <ConfirmDialog />
+            <ConfirmDialog />
 
-        <!-- Sticky top navigation bar with user name and action buttons -->
-        <AppTopbar />
+            <!-- Sticky top navigation bar with user name and action buttons -->
+            <AppTopbar />
 
-        <!--
+            <!--
             <slot /> renders the page-specific content from each admin page component.
             overflow-y-auto makes this area independently scrollable — the sidebar
             and topbar stay fixed while the content area scrolls.
         -->
-        <main class="flex-1 overflow-y-auto p-6">
-            <slot />
-        </main>
-
+            <main class="flex-1 overflow-y-auto p-6">
+                <slot />
+            </main>
+        </div>
     </div>
-</div>
 </template>

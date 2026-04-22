@@ -1,39 +1,36 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Front\CategoryController as FrontCategoryController;
-use App\Http\Controllers\Front\ProductController as FrontProductController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Front\HomeController;
-use App\Http\Controllers\Front\CartController;
-use App\Http\Controllers\Front\CheckoutController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Front\AccountOrderController;
-use Inertia\Inertia; 
-use App\Models\User;
-use App\Models\Product;
+use App\Http\Controllers\Front\CartController;
+use App\Http\Controllers\Front\CategoryController as FrontCategoryController;
+use App\Http\Controllers\Front\CheckoutController;
+use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\ProductController as FrontProductController;
+use App\Http\Controllers\ProfileController;
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-
-// 1st way 
+// 1st way
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
-        'users'         => (int) User::count(), 
-        'categories'    => (int) Category::count(),
-        'products'      => (int) Product::count(),
+        'users' => (int) User::count(),
+        'categories' => (int) Category::count(),
+        'products' => (int) Product::count(),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 // 2nd way
 Route::middleware(['auth', 'role:admin'])
@@ -45,7 +42,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('permissions', PermissionController::class)->except('create', 'show', 'edit');
         Route::resource('products', ProductController::class);
     });
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/category/{category:slug?}', [FrontCategoryController::class, 'index'])->name('category');
@@ -66,7 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::get('orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
     });
 
-    //checkout routes
+    // checkout routes
     Route::prefix('checkout')->controller(CheckoutController::class)->group(function () {
         Route::post('order', 'store')->name('checkout.order');
         Route::get('success', 'success')->name('checkout.success');
@@ -74,5 +70,4 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

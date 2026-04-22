@@ -15,23 +15,21 @@ defineProps({
 </script>
 
 <template>
-<AdminLayout>
+    <AdminLayout>
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Category</h1>
+        </div>
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Category</h1>
-    </div>
-
-    <!--
+        <!--
         :category="category"  → CategoryForm watches this prop and prefills the form fields.
         :submit-url           → PUT route for this specific category (requires the ID).
         method="put"          → CategoryForm sets _method=put in the form data for Laravel
                                 method spoofing (required for file uploads via FormData/POST).
     -->
-    <CategoryForm
-        :category="category"
-        :submit-url="route('admin.categories.update', category.id)"
-        method="put"
-    />
-
-</AdminLayout>
+        <CategoryForm
+            :category="category"
+            :submit-url="route('admin.categories.update', category.id)"
+            method="put"
+        />
+    </AdminLayout>
 </template>

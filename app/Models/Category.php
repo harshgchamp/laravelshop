@@ -15,8 +15,10 @@ class Category extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
-    use SoftDeletes; // Adds deleted_at column support — delete() becomes soft, forceDelete() hard-deletes
-    use HasSlug;     // Spatie: auto-generates slug from $slugOptions on `creating` and `updating` events
+
+    // Adds deleted_at column support — delete() becomes soft, forceDelete() hard-deletes
+    use HasSlug;
+    use SoftDeletes;     // Spatie: auto-generates slug from $slugOptions on `creating` and `updating` events
 
     /**
      * Mass-assignable columns.

@@ -19,11 +19,11 @@ class CategoryFactory extends Factory
         $name = fake()->unique()->words(2, true);
 
         return [
-            'name'        => $name,
-            'slug'        => \Illuminate\Support\Str::slug($name),
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
             'description' => fake()->optional()->sentence(),
-            'image'       => null,
-            'status'      => true,
+            'image' => null,
+            'status' => true,
         ];
     }
 }

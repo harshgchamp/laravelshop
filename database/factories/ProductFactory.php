@@ -17,19 +17,19 @@ class ProductFactory extends Factory
         $title = fake()->unique()->words(3, true);
 
         return [
-            'title'          => $title,
-            'slug'           => Str::slug($title),
-            'quantity'       => fake()->numberBetween(1, 100),
-            'description'    => fake()->optional()->paragraph(),
-            'image'          => null,
-            'published'      => false,
-            'in_stock'       => 1,
-            'price'          => fake()->randomFloat(2, 10, 500),
+            'title' => $title,
+            'slug' => Str::slug($title),
+            'quantity' => fake()->numberBetween(1, 100),
+            'description' => fake()->optional()->paragraph(),
+            'image' => null,
+            'published' => false,
+            'in_stock' => 1,
+            'price' => fake()->randomFloat(2, 10, 500),
             'discount_price' => null,
-            'category_id'    => Category::factory(),
-            'created_by'     => User::factory(),
-            'updated_by'     => null,
-            'deleted_by'     => null,
+            'category_id' => Category::factory(),
+            'created_by' => User::factory(),
+            'updated_by' => null,
+            'deleted_by' => null,
         ];
     }
 }
