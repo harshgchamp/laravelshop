@@ -1,10 +1,21 @@
 {
+    // jsconfig.json — tells VS Code's JavaScript language service how to resolve paths.
+    // This is NOT a TypeScript config; it just enables IDE intellisense and path aliases.
+    // Vite has its OWN alias config in vite.config.js → resolve.alias.
+    // These two configs must be kept in sync — both map '@' to 'resources/js/'.
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
+            // '@/*' lets VS Code understand imports like: import Foo from '@/Components/Foo.vue'
+            // Must match vite.config.js → resolve.alias → '@'
             "@/*": ["resources/js/*"],
+
+            // Makes VS Code resolve the 'ziggy-js' package to the local vendored copy
+            // so route() auto-completes and type-checks correctly in .vue files.
             "ziggy-js": ["./vendor/tightenco/ziggy"]
         }
     },
+    // Exclude large folders so VS Code's language service doesn't index them —
+    // indexing node_modules or public would slow down the IDE significantly.
     "exclude": ["node_modules", "public"]
 }
