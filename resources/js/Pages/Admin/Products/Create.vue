@@ -8,10 +8,12 @@
 import AdminLayout from '@/Pages/Admin/Layouts/AuthenticatedLayout.vue';
 import ProductForm from './Partials/ProductForm.vue';
 
-// `categories` is a plain collection: [{ id: 1, name: 'Electronics' }, ...]
-// Only id + name are selected in the controller — avoids leaking full category data.
+// Both collections are plain id+name pairs — avoids leaking full model data.
+// categories: [{ id: 1, name: 'Electronics' }, ...]
+// brands:     [{ id: 1, name: 'Nike' }, ...]
 defineProps({
     categories: Object,
+    brands: Object,
 });
 </script>
 
@@ -30,6 +32,7 @@ defineProps({
         <ProductForm
             :product="null"
             :categories="categories"
+            :brands="brands"
             :submit-url="route('admin.products.store')"
             method="post"
         />

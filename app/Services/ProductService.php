@@ -38,28 +38,67 @@ class ProductService
     ];
 
     /**
-     * Return a paginated, eager-loaded product list with optional dynamic sorting.
+     * Return a paginated, filtered, eager-loaded product list.
      *
-     * @param  string  $field  Sort column (validated against SORTABLE_FIELDS)
-     * @param  string  $order  'asc' or 'desc'
-     * @param  int  $perPage  Rows per page
+     * @param  string  $field  Sort column — validated against SORTABLE_FIELDS whitelist
+     * @param  string  $order  'asc' | 'desc'
+     * @param  int  $perPage  Rows per page (1–100)
+     * @param  array  $filters  Associative array of optional filter values:
+     *                          search, category_id, brand_id, price_from, price_to,
+     *                          published, in_stock — absent key = no filter applied
+     *
+     * WHY does the service receive a flat $filters array instead of individual params?
+     *  - Adding a new filter field requires only one change here (apply the scope).
+     *    If filters were individual params, the controller, service signature, and call
+     *    site would all need updating for each addition — three-point changes every time.
+     *  - The array is "open": callers that don't care about filters pass [] and get
+     *    the full unfiltered list. Old code paths don't break.
+     *
+     * WHY are scopes applied in the service rather than in the model's newQuery()?
+     *  - These are request-scoped filters, not permanent model constraints (like
+     *    ->where('deleted_at', null) which SoftDeletes adds globally). They only apply
+     *    to the admin listing — the storefront, Cart, or OrderService might query products
+     *    differently. Keeping them in the service makes that boundary explicit.
      */
     public function list(
         string $field = 'created_at',
         string $order = 'desc',
-        int $perPage = 10,
+        int $perPage = 3,
+        array $filters = [],
     ): LengthAwarePaginator {
-        // Reject any field not in the whitelist — fall back to created_at
+        // Second-layer whitelist — defence-in-depth even after FormRequest validation
         $sortField = in_array($field, self::SORTABLE_FIELDS, strict: true) ? $field : 'created_at';
-
-        // Only 'asc' or 'desc' are valid; anything else becomes 'desc'
         $sortOrder = $order === 'asc' ? 'asc' : 'desc';
 
+        // Extract filter values — missing keys produce null, which each scope ignores (no-op)
+        $search = $filters['search'] ?? null;
+        $categoryId = isset($filters['category_id']) ? (int) $filters['category_id'] : null;
+        $brandId = isset($filters['brand_id']) ? (int) $filters['brand_id'] : null;
+        $priceFrom = isset($filters['price_from']) ? (float) $filters['price_from'] : null;
+        $priceTo = isset($filters['price_to']) ? (float) $filters['price_to'] : null;
+
+        // WHY array_key_exists instead of isset for booleans?
+        //  - isset(false) returns false — meaning "show unpublished" would be skipped.
+        //    array_key_exists() returns true even when the value is false, so the scope
+        //    correctly receives `false` and filters to published = 0.
+        $published = array_key_exists('published', $filters) ? (bool) $filters['published'] : null;
+        $inStock = array_key_exists('in_stock', $filters) ? (bool) $filters['in_stock'] : null;
+
         return Product::query()
-            ->with('category')           // eager-load to prevent N+1: one query for products + one for categories
+            ->with(['category', 'brand']) // prevent N+1 — one extra query per relation, not per row
+            // ── Apply scopes ───────────────────────────────────────────────────
+            // Each scope is a no-op when its argument is null, so the chain always works
+            // regardless of which filters the user actually sent.
+            ->search($search)
+            ->ofCategory($categoryId)
+            ->ofBrand($brandId)
+            ->priceRange($priceFrom, $priceTo)
+            ->ofPublished($published)
+            ->ofInStock($inStock)
+            // ── Sort + paginate ────────────────────────────────────────────────
             ->orderBy($sortField, $sortOrder)
             ->paginate($perPage)
-            ->withQueryString();         // append ?field=&order=&perPage= to pagination links
+            ->withQueryString(); // preserves all query params (filters + sort) in pagination links
     }
 
     /**

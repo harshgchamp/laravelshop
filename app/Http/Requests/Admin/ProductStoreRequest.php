@@ -79,6 +79,12 @@ class ProductStoreRequest extends FormRequest
                 'required',
                 'exists:categories,id',
             ],
+
+            // brand_id is optional — products can exist without a brand assignment
+            'brand_id' => [
+                'nullable',
+                'exists:brands,id',
+            ],
         ];
     }
 }

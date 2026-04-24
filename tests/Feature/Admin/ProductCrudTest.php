@@ -39,10 +39,10 @@ class ProductCrudTest extends TestCase
         $categoryId ??= Category::factory()->create()->id;
 
         return [
-            'title'       => 'Test Product',
-            'quantity'    => 10,
-            'price'       => 99.99,
-            'in_stock'    => 1,
+            'title' => 'Test Product',
+            'quantity' => 10,
+            'price' => 99.99,
+            'in_stock' => 1,
             'category_id' => $categoryId,
         ];
     }
@@ -169,10 +169,10 @@ class ProductCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.products.store'), [
-                'title'       => 'Wireless Mouse',
-                'quantity'    => 50,
-                'price'       => 29.99,
-                'in_stock'    => 1,
+                'title' => 'Wireless Mouse',
+                'quantity' => 50,
+                'price' => 29.99,
+                'in_stock' => 1,
                 'category_id' => $category->id,
             ]);
 
@@ -180,8 +180,8 @@ class ProductCrudTest extends TestCase
             ->assertSessionHas('success', 'Product created successfully');
 
         $this->assertDatabaseHas('products', [
-            'title'       => 'Wireless Mouse',
-            'price'       => 29.99,
+            'title' => 'Wireless Mouse',
+            'price' => 29.99,
             'category_id' => $category->id,
         ]);
     }
@@ -425,15 +425,15 @@ class ProductCrudTest extends TestCase
 
     public function test_admin_can_update_a_product(): void
     {
-        $product  = Product::factory()->create(['title' => 'Old Title', 'price' => 10.00]);
+        $product = Product::factory()->create(['title' => 'Old Title', 'price' => 10.00]);
         $category = Category::factory()->create();
 
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'title'       => 'New Title',
-                'quantity'    => 5,
-                'price'       => 49.99,
-                'in_stock'    => 0,
+                'title' => 'New Title',
+                'quantity' => 5,
+                'price' => 49.99,
+                'in_stock' => 0,
                 'category_id' => $category->id,
             ]);
 
@@ -455,12 +455,12 @@ class ProductCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'title'       => $product->title,
-                'quantity'    => $product->quantity,
-                'price'       => $product->price,
-                'in_stock'    => $product->in_stock,
+                'title' => $product->title,
+                'quantity' => $product->quantity,
+                'price' => $product->price,
+                'in_stock' => $product->in_stock,
                 'category_id' => $product->category_id,
-                'image'       => UploadedFile::fake()->image('new-image.jpg'),
+                'image' => UploadedFile::fake()->image('new-image.jpg'),
             ]);
 
         Storage::disk('public')->assertMissing($oldPath);
@@ -478,10 +478,10 @@ class ProductCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'title'       => $product->title,
-                'quantity'    => $product->quantity,
-                'price'       => $product->price,
-                'in_stock'    => $product->in_stock,
+                'title' => $product->title,
+                'quantity' => $product->quantity,
+                'price' => $product->price,
+                'in_stock' => $product->in_stock,
                 'category_id' => $product->category_id,
             ]);
 
@@ -492,15 +492,15 @@ class ProductCrudTest extends TestCase
     public function test_update_slug_is_unique_excluding_self(): void
     {
         $category = Category::factory()->create();
-        $product  = Product::factory()->create(['slug' => 'my-product', 'category_id' => $category->id]);
+        $product = Product::factory()->create(['slug' => 'my-product', 'category_id' => $category->id]);
 
         $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'title'       => $product->title,
-                'slug'        => 'my-product',
-                'quantity'    => $product->quantity,
-                'price'       => $product->price,
-                'in_stock'    => $product->in_stock,
+                'title' => $product->title,
+                'slug' => 'my-product',
+                'quantity' => $product->quantity,
+                'price' => $product->price,
+                'in_stock' => $product->in_stock,
                 'category_id' => $category->id,
             ]);
 
@@ -514,9 +514,9 @@ class ProductCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'quantity'    => 5,
-                'price'       => 10.00,
-                'in_stock'    => 1,
+                'quantity' => 5,
+                'price' => 10.00,
+                'in_stock' => 1,
                 'category_id' => $product->category_id,
             ]);
 
@@ -529,9 +529,9 @@ class ProductCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $product), [
-                'title'       => 'Valid Title',
-                'quantity'    => 5,
-                'in_stock'    => 1,
+                'title' => 'Valid Title',
+                'quantity' => 5,
+                'in_stock' => 1,
                 'category_id' => $product->category_id,
             ]);
 
@@ -546,11 +546,11 @@ class ProductCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', $productB), [
-                'title'       => $productB->title,
-                'slug'        => 'product-a',
-                'quantity'    => $productB->quantity,
-                'price'       => $productB->price,
-                'in_stock'    => $productB->in_stock,
+                'title' => $productB->title,
+                'slug' => 'product-a',
+                'quantity' => $productB->quantity,
+                'price' => $productB->price,
+                'in_stock' => $productB->in_stock,
                 'category_id' => $category->id,
             ]);
 
@@ -561,10 +561,10 @@ class ProductCrudTest extends TestCase
     {
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.products.update', 9999), [
-                'title'       => 'Ghost',
-                'quantity'    => 1,
-                'price'       => 10.00,
-                'in_stock'    => 1,
+                'title' => 'Ghost',
+                'quantity' => 1,
+                'price' => 10.00,
+                'in_stock' => 1,
                 'category_id' => Category::factory()->create()->id,
             ]);
 
@@ -623,7 +623,7 @@ class ProductCrudTest extends TestCase
     public function test_deleted_product_is_not_visible_in_index(): void
     {
         $visible = Product::factory()->create(['title' => 'Visible Product']);
-        $hidden  = Product::factory()->create(['title' => 'Hidden Product']);
+        $hidden = Product::factory()->create(['title' => 'Hidden Product']);
         $hidden->delete();
 
         $this->actingAs($this->adminUser())
@@ -631,8 +631,7 @@ class ProductCrudTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Products/Index')
-                ->where('products.data', fn ($data) =>
-                    collect($data)->contains('title', 'Visible Product') &&
+                ->where('products.data', fn ($data) => collect($data)->contains('title', 'Visible Product') &&
                     ! collect($data)->contains('title', 'Hidden Product')
                 )
             );
