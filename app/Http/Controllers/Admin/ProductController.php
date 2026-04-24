@@ -50,15 +50,38 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        // Use null-coalescing defaults: query params are optional, not required
+        // ── Sorting params ──────────────────────────────────────────────────
         $field = $validated['field'] ?? 'created_at';
         $order = $validated['order'] ?? 'desc';
-        $perPage = (int) ($validated['perPage'] ?? 10);
+        $perPage = (int) ($validated['perPage'] ?? 3);
 
-        $products = $this->productService->list($field, $order, $perPage);
+        // ── Filter params ───────────────────────────────────────────────────
+        // Pull only the filter keys — sort/pagination keys are not filters.
+        // array_filter with null callback removes null values so the service
+        // receives only the filters the user actually sent.
+        $filters = array_filter([
+            'search' => $validated['search'] ?? null,
+            'category_id' => $validated['category_id'] ?? null,
+            'brand_id' => $validated['brand_id'] ?? null,
+            'price_from' => $validated['price_from'] ?? null,
+            'price_to' => $validated['price_to'] ?? null,
+            // Use null-safe coalescing but preserve false explicitly for booleans:
+            // If 'published' key is absent → not in $validated → null → removed by array_filter.
+            // If 'published' = false → 0/false in $validated → kept by this ternary.
+            'published' => array_key_exists('published', $validated) ? $validated['published'] : null,
+            'in_stock' => array_key_exists('in_stock', $validated) ? $validated['in_stock'] : null,
+        ], fn ($v) => $v !== null);
+
+        $products = $this->productService->list($field, $order, $perPage, $filters);
 
         return Inertia::render('Admin/Products/Index', [
             'products' => ProductResource::collection($products),
+            // Dropdown data for the filter bar — id+name only, no leaked model data
+            'categories' => Category::select('id', 'name')->get(),
+            'brands' => Brand::select('id', 'name')->get(),
+            // Pass active filters back to Vue so the filter inputs are pre-populated
+            // on page load (e.g. after a redirect or browser back-navigation).
+            'filters' => $validated,
         ]);
     }
 

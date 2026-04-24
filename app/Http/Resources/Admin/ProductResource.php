@@ -55,6 +55,9 @@ class ProductResource extends JsonResource
             // FK for pre-selecting the brand in the edit form dropdown (nullable)
             'brand_id' => $this->brand_id,
 
+            // Eager-loaded name — omitted entirely if brand was not loaded (whenLoaded prevents N+1)
+            'brand_name' => $this->whenLoaded('brand', fn () => $this->brand?->name),
+
             // Full public URL or null — built the same way as CategoryResource
             'image' => $this->image ? asset('storage/'.$this->image) : null,
 
