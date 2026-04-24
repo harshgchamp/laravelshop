@@ -352,10 +352,10 @@ const hasActiveFilters = () =>
             </p>
 
             <!-- ── DataTable ───────────────────────────────────────────────── -->
-            <DataTable :value="products.data" paginator :rows="10">
+            <DataTable :value="products.data">
                 <Column header="#">
                     <template #body="slotProps">
-                        {{ slotProps.index + 1 }}
+                        {{ (products.current_page - 1) * products.per_page + slotProps.index + 1 }}
                     </template>
                 </Column>
 
@@ -413,6 +413,41 @@ const hasActiveFilters = () =>
                     </template>
                 </Column>
             </DataTable>
+
+            <!-- ── Pagination ─────────────────────────────────────────────── -->
+            <!--
+                Server-side pagination using Laravel's LengthAwarePaginator links.
+                Each link has { url, label, active } — url is null for disabled prev/next.
+                withQueryString() in the service bakes current filter params into every
+                page URL, so filters are preserved when navigating between pages.
+                preserveScroll keeps the viewport position instead of jumping to the top.
+            -->
+            <div v-if="products.last_page > 1" class="flex items-center justify-between mt-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Showing
+                    {{ (products.current_page - 1) * products.per_page + 1 }}–{{
+                        Math.min(products.current_page * products.per_page, products.total)
+                    }}
+                    of {{ products.total }}
+                </p>
+
+                <div class="flex gap-1">
+                    <button
+                        v-for="link in products.links"
+                        :key="link.label"
+                        :disabled="!link.url"
+                        :class="[
+                            'px-3 py-1 text-sm rounded border transition-colors',
+                            link.active
+                                ? 'bg-primary-500 text-white border-primary-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700',
+                            !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                        ]"
+                        @click="link.url && router.get(link.url, {}, { preserveScroll: true })"
+                        v-html="link.label"
+                    />
+                </div>
+            </div>
         </div>
     </AdminLayout>
 </template>

@@ -72,20 +72,14 @@ const destroy = (row) => {
                 </Link>
             </div>
 
-            <!--
-            :value="categories.data" — DataTable receives the `data` array from the
-            Laravel paginator (ResourceCollection unwraps to { data, links, meta }).
-
-            paginator + :rows="10" — DataTable's CLIENT-SIDE paginator. Note: since
-            the controller already paginates at 10, this is a UI-only paginator over
-            the current page's data. For true server-side pagination, use
-            @page="onPage" and re-request the server.
-        -->
-            <DataTable :value="categories.data" paginator :rows="10">
-                <!-- Row number: slotProps.index is 0-based within the current page -->
+            <DataTable :value="categories.data">
                 <Column header="#">
                     <template #body="slotProps">
-                        {{ slotProps.index + 1 }}
+                        {{
+                            (categories.current_page - 1) * categories.per_page +
+                            slotProps.index +
+                            1
+                        }}
                     </template>
                 </Column>
 
@@ -127,6 +121,34 @@ const destroy = (row) => {
                     </template>
                 </Column>
             </DataTable>
+
+            <!-- ── Pagination ─────────────────────────────────────────────── -->
+            <div v-if="categories.last_page > 1" class="flex items-center justify-between mt-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Showing
+                    {{ (categories.current_page - 1) * categories.per_page + 1 }}–{{
+                        Math.min(categories.current_page * categories.per_page, categories.total)
+                    }}
+                    of {{ categories.total }}
+                </p>
+
+                <div class="flex gap-1">
+                    <button
+                        v-for="link in categories.links"
+                        :key="link.label"
+                        :disabled="!link.url"
+                        :class="[
+                            'px-3 py-1 text-sm rounded border transition-colors',
+                            link.active
+                                ? 'bg-primary-500 text-white border-primary-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700',
+                            !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                        ]"
+                        @click="link.url && router.get(link.url, {}, { preserveScroll: true })"
+                        v-html="link.label"
+                    />
+                </div>
+            </div>
         </div>
     </AdminLayout>
 </template>
