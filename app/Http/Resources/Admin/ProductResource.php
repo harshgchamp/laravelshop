@@ -52,6 +52,9 @@ class ProductResource extends JsonResource
             // FK for pre-selecting the category in the edit form dropdown
             'category_id' => $this->category_id,
 
+            // FK for pre-selecting the brand in the edit form dropdown (nullable)
+            'brand_id' => $this->brand_id,
+
             // Full public URL or null — built the same way as CategoryResource
             'image' => $this->image ? asset('storage/'.$this->image) : null,
 

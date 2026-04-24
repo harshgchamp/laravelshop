@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\ProductIndexRequest;
 use App\Http\Requests\Admin\ProductStoreRequest;
 use App\Http\Requests\Admin\ProductUpdateRequest;
 use App\Http\Resources\Admin\ProductResource;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
@@ -74,6 +75,7 @@ class ProductController extends Controller
     {
         return Inertia::render('Admin/Products/Create', [
             'categories' => Category::select('id', 'name')->get(),
+            'brands' => Brand::select('id', 'name')->get(), // id + name only — avoids leaking full brand data
         ]);
     }
 
@@ -118,6 +120,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Edit', [
             'product' => (new ProductResource($product))->resolve(),
             'categories' => Category::select('id', 'name')->get(),
+            'brands' => Brand::select('id', 'name')->get(),
         ]);
     }
 

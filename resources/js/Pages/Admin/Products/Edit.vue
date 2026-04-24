@@ -13,6 +13,7 @@ import ProductForm from './Partials/ProductForm.vue'; // NOT CategoryForm — wa
 defineProps({
     product: Object,
     categories: Object,
+    brands: Object,
 });
 </script>
 
@@ -30,6 +31,7 @@ defineProps({
         <ProductForm
             :product="product"
             :categories="categories"
+            :brands="brands"
             :submit-url="route('admin.products.update', product.id)"
             method="put"
         />

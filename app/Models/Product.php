@@ -14,6 +14,7 @@ use Spatie\Sluggable\SlugOptions;
 class Product extends Model
 {
     use HasFactory;
+
     // migration has softDeletes() — delete() sets deleted_at, record stays in DB
     use HasSlug;
     use SoftDeletes;     // auto-generates slug from `title` on create/update
@@ -34,6 +35,7 @@ class Product extends Model
         'title',
         'slug',
         'category_id',
+        'brand_id',      // nullable FK — products can exist without a brand assignment
         'description',
         'published',
         'quantity',
@@ -72,5 +74,14 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * A product optionally belongs to one brand.
+     * FK: products.brand_id → brands.id (nullOnDelete — safe for soft-delete workflows)
+     */
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
     }
 }
