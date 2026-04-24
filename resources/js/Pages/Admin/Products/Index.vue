@@ -344,18 +344,19 @@ const hasActiveFilters = () =>
                 products.total is injected by LengthAwarePaginator into the ResourceCollection.
                 Showing it gives the admin immediate feedback on how many rows match the filters.
             -->
-            <p
-                v-if="products.total !== undefined"
-                class="text-sm text-gray-500 dark:text-gray-400 mb-2"
-            >
-                {{ products.total }} product{{ products.total === 1 ? '' : 's' }} found
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                {{ products.meta.total }} product{{ products.meta.total === 1 ? '' : 's' }} found
             </p>
 
             <!-- ── DataTable ───────────────────────────────────────────────── -->
             <DataTable :value="products.data">
                 <Column header="#">
                     <template #body="slotProps">
-                        {{ (products.current_page - 1) * products.per_page + slotProps.index + 1 }}
+                        {{
+                            (products.meta.current_page - 1) * products.meta.per_page +
+                            slotProps.index +
+                            1
+                        }}
                     </template>
                 </Column>
 
@@ -422,18 +423,21 @@ const hasActiveFilters = () =>
                 page URL, so filters are preserved when navigating between pages.
                 preserveScroll keeps the viewport position instead of jumping to the top.
             -->
-            <div v-if="products.last_page > 1" class="flex items-center justify-between mt-4">
+            <div v-if="products.meta.last_page > 1" class="flex items-center justify-between mt-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Showing
-                    {{ (products.current_page - 1) * products.per_page + 1 }}–{{
-                        Math.min(products.current_page * products.per_page, products.total)
+                    {{ (products.meta.current_page - 1) * products.meta.per_page + 1 }}–{{
+                        Math.min(
+                            products.meta.current_page * products.meta.per_page,
+                            products.meta.total,
+                        )
                     }}
-                    of {{ products.total }}
+                    of {{ products.meta.total }}
                 </p>
 
                 <div class="flex gap-1">
                     <button
-                        v-for="link in products.links"
+                        v-for="link in products.meta.links"
                         :key="link.label"
                         :disabled="!link.url"
                         :class="[

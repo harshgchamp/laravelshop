@@ -76,7 +76,7 @@ const destroy = (row) => {
                 <Column header="#">
                     <template #body="slotProps">
                         {{
-                            (categories.current_page - 1) * categories.per_page +
+                            (categories.meta.current_page - 1) * categories.meta.per_page +
                             slotProps.index +
                             1
                         }}
@@ -123,18 +123,24 @@ const destroy = (row) => {
             </DataTable>
 
             <!-- ── Pagination ─────────────────────────────────────────────── -->
-            <div v-if="categories.last_page > 1" class="flex items-center justify-between mt-4">
+            <div
+                v-if="categories.meta.last_page > 1"
+                class="flex items-center justify-between mt-4"
+            >
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Showing
-                    {{ (categories.current_page - 1) * categories.per_page + 1 }}–{{
-                        Math.min(categories.current_page * categories.per_page, categories.total)
+                    {{ (categories.meta.current_page - 1) * categories.meta.per_page + 1 }}–{{
+                        Math.min(
+                            categories.meta.current_page * categories.meta.per_page,
+                            categories.meta.total,
+                        )
                     }}
-                    of {{ categories.total }}
+                    of {{ categories.meta.total }}
                 </p>
 
                 <div class="flex gap-1">
                     <button
-                        v-for="link in categories.links"
+                        v-for="link in categories.meta.links"
                         :key="link.label"
                         :disabled="!link.url"
                         :class="[

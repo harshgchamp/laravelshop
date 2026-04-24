@@ -73,7 +73,11 @@ const destroy = (row) => {
             <DataTable :value="brands.data">
                 <Column header="#">
                     <template #body="slotProps">
-                        {{ (brands.current_page - 1) * brands.per_page + slotProps.index + 1 }}
+                        {{
+                            (brands.meta.current_page - 1) * brands.meta.per_page +
+                            slotProps.index +
+                            1
+                        }}
                     </template>
                 </Column>
 
@@ -132,18 +136,18 @@ const destroy = (row) => {
             </DataTable>
 
             <!-- ── Pagination ─────────────────────────────────────────────── -->
-            <div v-if="brands.last_page > 1" class="flex items-center justify-between mt-4">
+            <div v-if="brands.meta.last_page > 1" class="flex items-center justify-between mt-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Showing
-                    {{ (brands.current_page - 1) * brands.per_page + 1 }}–{{
-                        Math.min(brands.current_page * brands.per_page, brands.total)
+                    {{ (brands.meta.current_page - 1) * brands.meta.per_page + 1 }}–{{
+                        Math.min(brands.meta.current_page * brands.meta.per_page, brands.meta.total)
                     }}
-                    of {{ brands.total }}
+                    of {{ brands.meta.total }}
                 </p>
 
                 <div class="flex gap-1">
                     <button
-                        v-for="link in brands.links"
+                        v-for="link in brands.meta.links"
                         :key="link.label"
                         :disabled="!link.url"
                         :class="[
