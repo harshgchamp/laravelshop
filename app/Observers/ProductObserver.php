@@ -6,6 +6,7 @@ namespace App\Observers;
 
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * ProductObserver
@@ -73,5 +74,25 @@ class ProductObserver
 
         // Persist deleted_by BEFORE the soft-delete UPDATE runs, without triggering events
         $product->saveQuietly();
+    }
+
+    /**
+     * Fires AFTER a Product is permanently (hard) deleted via forceDelete().
+     *
+     * WHY forceDeleted and not deleted?
+     *  - `deleted` fires on soft-delete — we keep the image so the product can be restored.
+     *  - `forceDeleted` fires only on a permanent wipe. At that point the record is gone
+     *    for good, so cleaning up the file from disk is safe.
+     *
+     * WHY not delete the image in destroy() in the service?
+     *  - ProductService::destroy() handles soft-delete and already removes the image there.
+     *    forceDeleted() is a safety net for admin force-deletes triggered elsewhere
+     *    (e.g. a future cleanup command) — ensures no orphaned files regardless of call site.
+     */
+    public function forceDeleted(Product $product): void
+    {
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
     }
 }

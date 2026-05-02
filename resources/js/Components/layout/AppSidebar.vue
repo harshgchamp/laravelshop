@@ -94,6 +94,14 @@ const toggle = () => {
                 <i class="pi pi-key" />
                 <span v-show="!collapsed" class="ml-2">Permissions</span>
             </Link>
+
+            <Link
+                :href="route('admin.activity-logs.index')"
+                class="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+            >
+                <i class="pi pi-list" />
+                <span v-show="!collapsed" class="ml-2">Activity Log</span>
+            </Link>
         </nav>
     </div>
 </template>
