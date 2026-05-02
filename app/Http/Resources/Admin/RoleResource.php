@@ -17,11 +17,12 @@ class RoleResource extends JsonResource
             'guard_name' => $this->guard_name,
             // permissions_count comes from withCount() in RoleService::list()
             'permissions_count' => $this->permissions_count ?? 0,
-            // Array of permission IDs — used to pre-select checkboxes on the edit form.
-            // whenLoaded() prevents N+1: only included when ->with('permissions') was called.
+            // {id, name} objects — index page uses `name` for the popover display;
+            // edit form extracts `id` for MultiSelect pre-selection.
+            // whenLoaded() prevents N+1 when permissions were not eager-loaded.
             'permissions' => $this->whenLoaded(
                 'permissions',
-                fn () => $this->permissions->pluck('id')->all(),
+                fn () => $this->permissions->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])->all(),
             ),
             'created_at' => $this->created_at?->format('Y-m-d'),
         ];

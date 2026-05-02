@@ -1,10 +1,12 @@
 <script setup>
+import { ref } from 'vue';
 import AdminLayout from '@/Pages/Admin/Layouts/AuthenticatedLayout.vue';
 import { router, Link } from '@inertiajs/vue3';
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
+import Popover from 'primevue/popover';
 import { useConfirm } from 'primevue/useconfirm';
 
 defineProps({
@@ -13,6 +15,17 @@ defineProps({
 
 const confirm = useConfirm();
 
+// ── Permission popover ────────────────────────────────────────────────────────
+// One shared Popover for the whole table — toggle with the clicked badge as anchor.
+const permPopover = ref(null);
+const activePermissions = ref([]);
+
+const showPermissions = (event, permissions) => {
+    activePermissions.value = permissions ?? [];
+    permPopover.value.toggle(event);
+};
+
+// ── Delete ────────────────────────────────────────────────────────────────────
 const destroy = (row) => {
     confirm.require({
         message: `Delete role "${row.name}"? Users assigned this role will lose it.`,
@@ -50,11 +63,20 @@ const destroy = (row) => {
                 <Column field="name" header="Name" />
                 <Column field="guard_name" header="Guard" />
 
-                <!-- Permission count badge -->
+                <!-- Clickable permission count — opens popover listing the names -->
                 <Column header="Permissions">
                     <template #body="slotProps">
                         <span
-                            class="px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+                            :class="[
+                                'px-2 py-0.5 rounded text-xs font-medium transition-colors',
+                                slotProps.data.permissions_count > 0
+                                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800'
+                                    : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500',
+                            ]"
+                            @click="
+                                slotProps.data.permissions_count > 0 &&
+                                showPermissions($event, slotProps.data.permissions)
+                            "
                         >
                             {{ slotProps.data.permissions_count }}
                         </span>
@@ -110,5 +132,26 @@ const destroy = (row) => {
                 </div>
             </div>
         </div>
+
+        <!-- Permission names popover — shared across all rows -->
+        <Popover ref="permPopover">
+            <div class="min-w-40 max-w-64 p-1">
+                <p
+                    class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2"
+                >
+                    Assigned Permissions
+                </p>
+                <ul class="space-y-1.5">
+                    <li
+                        v-for="perm in activePermissions"
+                        :key="perm.id"
+                        class="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200"
+                    >
+                        <i class="pi pi-key text-xs text-gray-400" />
+                        {{ perm.name }}
+                    </li>
+                </ul>
+            </div>
+        </Popover>
     </AdminLayout>
 </template>

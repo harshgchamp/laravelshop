@@ -24,13 +24,14 @@ const form = useForm({
 
 const methodText = computed(() => (props.method === 'put' ? 'Updated' : 'Created'));
 
-// Prefill on edit — role.permissions is an array of permission IDs from RoleResource
+// Prefill on edit — role.permissions is [{id, name}] from RoleResource;
+// extract IDs so MultiSelect (option-value="id") pre-selects the right options.
 watch(
     () => props.role,
     (role) => {
         if (role) {
             form.name = role.name;
-            form.permissions = role.permissions ?? [];
+            form.permissions = (role.permissions ?? []).map((p) => p.id);
         }
     },
     { immediate: true },

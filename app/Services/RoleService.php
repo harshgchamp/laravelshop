@@ -14,6 +14,7 @@ class RoleService
     {
         return Role::query()
             ->withCount('permissions')
+            ->with('permissions:id,name')
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString();
