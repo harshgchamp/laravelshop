@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -8,96 +10,70 @@ use App\Http\Requests\Admin\UserStoreRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index(UserIndexRequest $request)
-    {
-        $query = User::query();
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
 
-        $users = $query
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+    public function index(UserIndexRequest $request): Response
+    {
+        $validated = $request->validated();
+
+        $field = $validated['field'] ?? 'created_at';
+        $order = $validated['order'] ?? 'desc';
+        $perPage = (int) ($validated['perPage'] ?? 10);
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => UserResource::collection($users),
+            'users' => UserResource::collection($this->userService->list($field, $order, $perPage)),
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
-        $roles = Role::all();
-
         return Inertia::render('Admin/Users/Create', [
-            'roles' => $roles,
+            'roles' => Role::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
-    public function store(UserStoreRequest $request)
+    public function store(UserStoreRequest $request): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-            $user->assignRole($request->role);
-            DB::commit();
+        $this->userService->store($request->validated());
 
-            return redirect()
-                ->route('admin.users.index')
-                ->with('success', 'User created successfully');
-            // return back()->with('success', $user->name. ' created successfully.');
-        } catch (\Throwable $th) {
-            DB::rollback();
-
-            return back()->with('error', 'Error creating user: '.$th->getMessage());
-        }
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User created successfully.');
     }
 
-    public function edit(User $user)
+    public function edit(User $user): Response
     {
-        $roles = Role::all();
-
         return Inertia::render('Admin/Users/Edit', [
             'user' => (new UserResource($user))->resolve(),
-            'roles' => $roles,
+            'roles' => Role::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
-    public function update(UserUpdateRequest $request, User $user)
+    public function update(UserUpdateRequest $request, User $user): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $user->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => $request->password ? Hash::make($request->password) : $user->password,
-            ]);
-            $user->syncRoles([$request->role]);
-            DB::commit();
+        $this->userService->update($user, $request->validated());
 
-            return redirect()
-                ->route('admin.users.index')
-                ->with('success', 'User updated successfully');
-            // return back()->with('success', $user->name. ' updated successfully.');
-        } catch (\Throwable $th) {
-            DB::rollback();
-
-            return back()->with('error', 'Error updating '.$user->name.$th->getMessage());
-        }
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
-        $user->delete();
+        $this->userService->destroy($user);
 
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User deleted successfully.');
     }
 }

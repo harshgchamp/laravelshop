@@ -1,17 +1,4 @@
 <script setup>
-/**
- * Admin/Permission/Index.vue — Permission management page
- *
- * Unlike Category/Product (which use separate Create/Edit pages),
- * permissions are managed inline via a Dialog modal — keeping the workflow fast
- * since permissions are just a single `name` field.
- *
- * Features:
- *  - Server-side search via Inertia router.get() with ?search= query param
- *  - Create / Edit inside a PrimeVue Dialog (no page navigation needed)
- *  - Delete with ConfirmDialog
- *  - Correct row numbers accounting for current page offset
- */
 import { ref, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Pages/Admin/Layouts/AuthenticatedLayout.vue';
@@ -24,28 +11,18 @@ import InputText from 'primevue/inputtext';
 import { useConfirm } from 'primevue/useconfirm';
 
 const props = defineProps({
-    // Paginated permission data from PermissionController@index
     permissions: Object,
-    // Current filter values echoed back from the controller so the search input stays in sync
     filters: Object,
 });
 
-// ─── Local State ─────────────────────────────────────────────────────────────
 const dialogVisible = ref(false);
-const editing = ref(false); // true = edit mode, false = create mode
-const selectedId = ref(null); // ID of the permission being edited
-
-// Search input mirrors props.filters.search (set by the server after each navigation)
+const editing = ref(false);
+const selectedId = ref(null);
 const search = ref(props.filters?.search ?? '');
 
 const confirm = useConfirm();
-
-// useForm with only `name` — permissions are just a name string
 const form = useForm({ name: '' });
 
-// ─── Sync search input with server-side filter state ─────────────────────────
-// If the user navigates back/forward (browser history), props.filters changes.
-// This watch keeps the input in sync with the actual applied filter.
 watch(
     () => props.filters?.search,
     (val) => {
@@ -53,9 +30,6 @@ watch(
     },
 );
 
-// ─── Dialog Helpers ──────────────────────────────────────────────────────────
-
-// Open dialog in CREATE mode — reset any previous form state
 const openCreate = () => {
     editing.value = false;
     selectedId.value = null;
@@ -63,7 +37,6 @@ const openCreate = () => {
     dialogVisible.value = true;
 };
 
-// Open dialog in EDIT mode — prefill form with the row's current name
 const openEdit = (row) => {
     editing.value = true;
     selectedId.value = row.id;
@@ -71,12 +44,6 @@ const openEdit = (row) => {
     dialogVisible.value = true;
 };
 
-// ─── Submit (Create or Update) ───────────────────────────────────────────────
-/**
- * WHY use form.put() / form.post() directly (no forceFormData)?
- *  - Permissions have no file upload — Inertia can send JSON directly.
- *    No need for multipart/form-data or method spoofing here.
- */
 const submit = () => {
     if (editing.value) {
         form.put(route('admin.permissions.update', selectedId.value), {
@@ -96,7 +63,6 @@ const submit = () => {
     }
 };
 
-// ─── Delete ──────────────────────────────────────────────────────────────────
 const destroy = (row) => {
     confirm.require({
         message: `Delete "${row.name}" permission?`,
@@ -109,13 +75,6 @@ const destroy = (row) => {
     });
 };
 
-// ─── Server-side Search ──────────────────────────────────────────────────────
-/**
- * WHY router.get() instead of a form submit for search?
- *  - Inertia's router.get() preserves the SPA feel — only the page props update,
- *    not the full page. preserveState: true keeps Vue component state intact.
- *  - replace: true updates the URL without adding a history entry (no extra back-button step).
- */
 const applySearch = () => {
     router.get(
         route('admin.permissions.index'),
@@ -124,7 +83,6 @@ const applySearch = () => {
     );
 };
 
-// Clear search and reload with no filter
 const resetSearch = () => {
     search.value = '';
     router.get(route('admin.permissions.index'), {}, { preserveState: true, replace: true });
@@ -139,7 +97,7 @@ const resetSearch = () => {
                 <Button label="New Permission" icon="pi pi-plus" @click="openCreate" />
             </div>
 
-            <!-- Search bar — triggers server-side filter on Enter or button click -->
+            <!-- Search bar -->
             <div class="flex gap-2 mb-4">
                 <InputText
                     v-model="search"
@@ -149,20 +107,18 @@ const resetSearch = () => {
                 />
                 <Button label="Search" icon="pi pi-search" @click="applySearch" />
                 <Button
+                    v-if="search"
                     label="Reset"
-                    icon="pi pi-refresh"
+                    icon="pi pi-times"
                     severity="secondary"
+                    outlined
                     @click="resetSearch"
                 />
             </div>
 
-            <DataTable :value="permissions.data" paginator :rows="10">
-                <!--
-                Correct row number across pages:
-                (current_page - 1) * per_page gives the offset of the first row on this page.
-                Adding slotProps.index gives the position within the current page.
-                e.g. page 2, per_page 10, index 0 → row number 11.
-            -->
+            <!-- PermissionController passes a raw LengthAwarePaginator (not ResourceCollection),
+                 so pagination fields are at the top level: permissions.current_page, etc. -->
+            <DataTable :value="permissions.data">
                 <Column header="#">
                     <template #body="slotProps">
                         {{
@@ -182,12 +138,14 @@ const resetSearch = () => {
                         <div class="flex items-center gap-2">
                             <Button
                                 label="Edit"
+                                icon="pi pi-pencil"
                                 outlined
                                 size="small"
                                 @click="openEdit(slotProps.data)"
                             />
                             <Button
                                 label="Delete"
+                                icon="pi pi-trash"
                                 outlined
                                 severity="danger"
                                 size="small"
@@ -197,14 +155,37 @@ const resetSearch = () => {
                     </template>
                 </Column>
             </DataTable>
+
+            <!-- ── Pagination ─────────────────────────────────────────────── -->
+            <div v-if="permissions.last_page > 1" class="flex items-center justify-between mt-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Showing
+                    {{ (permissions.current_page - 1) * permissions.per_page + 1 }}–{{
+                        Math.min(permissions.current_page * permissions.per_page, permissions.total)
+                    }}
+                    of {{ permissions.total }}
+                </p>
+
+                <div class="flex gap-1">
+                    <button
+                        v-for="link in permissions.links"
+                        :key="link.label"
+                        :disabled="!link.url"
+                        :class="[
+                            'px-3 py-1 text-sm rounded border transition-colors',
+                            link.active
+                                ? 'bg-primary-500 text-white border-primary-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700',
+                            !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                        ]"
+                        @click="link.url && router.get(link.url, {}, { preserveScroll: true })"
+                        v-html="link.label"
+                    />
+                </div>
+            </div>
         </div>
 
-        <!--
-        Dialog — shared modal for both create and edit.
-        v-model:visible is PrimeVue's two-way binding for dialog open/close state.
-        :header changes dynamically based on `editing` flag.
-        @hide resets the form when the dialog is closed (X button or backdrop click).
-    -->
+        <!-- Create / Edit Dialog -->
         <Dialog
             v-model:visible="dialogVisible"
             modal

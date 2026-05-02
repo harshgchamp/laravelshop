@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,104 +9,56 @@ use App\Http\Requests\Admin\PermissionIndexRequest;
 use App\Http\Requests\Admin\PermissionStoreRequest;
 use App\Http\Requests\Admin\PermissionUpdateRequest;
 use App\Models\Permission;
-use Illuminate\Support\Facades\DB;
+use App\Services\PermissionService;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PermissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(PermissionIndexRequest $request)
+    public function __construct(
+        private readonly PermissionService $permissionService,
+    ) {}
+
+    public function index(PermissionIndexRequest $request): Response
     {
-        $permissions = Permission::query();
+        $validated = $request->validated();
 
-        // Search
-        if ($request->filled('search')) {
-            $permissions->where(function ($query) use ($request) {
-                $query->where('name', 'like', "%{$request->search}%")
-                    ->orWhere('guard_name', 'like', "%{$request->search}%");
-            });
-        }
-
-        // Safe Sorting
-        $allowedFields = ['name', 'guard_name'];
-        $allowedOrders = ['asc', 'desc'];
-
-        $field = in_array($request->field, $allowedFields)
-            ? $request->field
-            : 'name';
-
-        $order = in_array($request->order, $allowedOrders)
-            ? $request->order
-            : 'asc';
-
-        $permissions->orderBy($field, $order);
+        $field = $validated['field'] ?? 'name';
+        $order = $validated['order'] ?? 'asc';
+        $perPage = (int) ($validated['perPage'] ?? 2);
+        $filters = ['search' => $validated['search'] ?? null];
 
         return Inertia::render('Admin/Permission/Index', [
-            'title' => 'Permission',
             'filters' => $request->only(['search', 'field', 'order']),
-            'permissions' => $permissions->paginate(10)->withQueryString(),
+            'permissions' => $this->permissionService->list($field, $order, $perPage, $filters),
         ]);
     }
 
-    public function store(PermissionStoreRequest $request)
+    public function store(PermissionStoreRequest $request): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $permission = Permission::create([
-                'name' => $request->name,
-            ]);
-            DB::commit();
+        $this->permissionService->store($request->validated());
 
-            return redirect()
-                ->route('admin.permissions.index')
-                ->with('success', 'Permission created successfully');
-            // return back()->with('success', $permission->name. ' created successfully.');
-        } catch (\Throwable $th) {
-            DB::rollback();
-
-            return back()->with('error', 'Error creating '.$th->getMessage());
-        }
+        return redirect()
+            ->route('admin.permissions.index')
+            ->with('success', 'Permission created successfully.');
     }
 
-    public function update(PermissionUpdateRequest $request, Permission $permission)
+    public function update(PermissionUpdateRequest $request, Permission $permission): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $permission->update([
-                'name' => $request->name,
-            ]);
-            DB::commit();
+        $this->permissionService->update($permission, $request->validated());
 
-            return redirect()
-                ->route('admin.permissions.index')
-                ->with('success', 'Permission updated successfully');
-            // return back()->with('success',  $permission->name. ' updated successfully.');
-        } catch (\Throwable $th) {
-            DB::rollback();
-
-            return back()->with('error', 'Error updating '.$th->getMessage());
-        }
+        return redirect()
+            ->route('admin.permissions.index')
+            ->with('success', 'Permission updated successfully.');
     }
 
-    public function destroy(Permission $permission)
+    public function destroy(Permission $permission): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $permission->delete();
-            DB::commit();
+        $this->permissionService->destroy($permission);
 
-            return redirect()
-                ->route('admin.permissions.index')
-                ->with('success', 'Permission deleted successfully');
-            // return back()->with('success', $permission->name. ' deleted successfully.');
-        } catch (\Throwable $th) {
-            DB::rollback();
-
-            return back()->with('error', 'Error deleting '.$permission->name.$th->getMessage());
-        }
+        return redirect()
+            ->route('admin.permissions.index')
+            ->with('success', 'Permission deleted successfully.');
     }
 }

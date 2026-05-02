@@ -8,19 +8,19 @@ import Button from 'primevue/button';
 import { useConfirm } from 'primevue/useconfirm';
 
 defineProps({
-    users: Object,
+    roles: Object,
 });
 
 const confirm = useConfirm();
 
 const destroy = (row) => {
     confirm.require({
-        message: `Delete user "${row.name}"?`,
+        message: `Delete role "${row.name}"? Users assigned this role will lose it.`,
         header: 'Confirm Delete',
         icon: 'pi pi-exclamation-triangle',
         acceptClass: 'p-button-danger',
         accept: () => {
-            router.delete(route('admin.users.destroy', row.id));
+            router.delete(route('admin.roles.destroy', row.id));
         },
     });
 };
@@ -30,17 +30,17 @@ const destroy = (row) => {
     <AdminLayout>
         <div class="card">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Users</h2>
-                <Link :href="route('admin.users.create')">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Roles</h2>
+                <Link :href="route('admin.roles.create')">
                     <Button label="New" icon="pi pi-plus" />
                 </Link>
             </div>
 
-            <DataTable :value="users.data">
+            <DataTable :value="roles.data">
                 <Column header="#">
                     <template #body="slotProps">
                         {{
-                            (users.meta.current_page - 1) * users.meta.per_page +
+                            (roles.meta.current_page - 1) * roles.meta.per_page +
                             slotProps.index +
                             1
                         }}
@@ -48,26 +48,25 @@ const destroy = (row) => {
                 </Column>
 
                 <Column field="name" header="Name" />
-                <Column field="email" header="Email" />
+                <Column field="guard_name" header="Guard" />
 
-                <Column header="Role">
+                <!-- Permission count badge -->
+                <Column header="Permissions">
                     <template #body="slotProps">
                         <span
-                            v-if="slotProps.data.role"
-                            class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                            class="px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
                         >
-                            {{ slotProps.data.role }}
+                            {{ slotProps.data.permissions_count }}
                         </span>
-                        <span v-else class="text-gray-400 text-sm">—</span>
                     </template>
                 </Column>
 
-                <Column field="created_at" header="Joined" />
+                <Column field="created_at" header="Created" />
 
                 <Column header="Actions">
                     <template #body="slotProps">
                         <div class="flex items-center gap-2">
-                            <Link :href="route('admin.users.edit', slotProps.data.id)">
+                            <Link :href="route('admin.roles.edit', slotProps.data.id)">
                                 <Button label="Edit" icon="pi pi-pencil" outlined size="small" />
                             </Link>
                             <Button
@@ -84,18 +83,18 @@ const destroy = (row) => {
             </DataTable>
 
             <!-- ── Pagination ─────────────────────────────────────────────── -->
-            <div v-if="users.meta.last_page > 1" class="flex items-center justify-between mt-4">
+            <div v-if="roles.meta.last_page > 1" class="flex items-center justify-between mt-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Showing
-                    {{ (users.meta.current_page - 1) * users.meta.per_page + 1 }}–{{
-                        Math.min(users.meta.current_page * users.meta.per_page, users.meta.total)
+                    {{ (roles.meta.current_page - 1) * roles.meta.per_page + 1 }}–{{
+                        Math.min(roles.meta.current_page * roles.meta.per_page, roles.meta.total)
                     }}
-                    of {{ users.meta.total }}
+                    of {{ roles.meta.total }}
                 </p>
 
                 <div class="flex gap-1">
                     <button
-                        v-for="link in users.meta.links"
+                        v-for="link in roles.meta.links"
                         :key="link.label"
                         :disabled="!link.url"
                         :class="[

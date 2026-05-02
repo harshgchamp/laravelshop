@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Front\AccountOrderController;
 use App\Http\Controllers\Front\CartController;
@@ -40,7 +41,8 @@ Route::middleware(['auth', 'role:admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('brands', BrandController::class)->except('show');
-        Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class)->except('show');
+        Route::resource('roles', RoleController::class)->except('show');
         Route::resource('permissions', PermissionController::class)->except('create', 'show', 'edit');
         Route::resource('products', ProductController::class);
     });
