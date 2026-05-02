@@ -25,7 +25,8 @@ const toast = useToast();
 
 const props = defineProps({
     product: { type: Object, default: null }, // null on Create, ProductResource on Edit
-    categories: { type: Object, required: true }, // [{ id, name }] for the dropdown
+    categories: { type: Object, required: true }, // [{ id, name }] for the category dropdown
+    brands: { type: Object, required: true }, // [{ id, name }] for the brand dropdown
     submitUrl: { type: String, required: true },
     method: { type: String, required: true }, // 'post' | 'put'
 });
@@ -42,6 +43,7 @@ const form = useForm({
     title: '',
     slug: '', // user can override; blank = auto-generated from title on server
     category_id: null,
+    brand_id: null, // optional — products can exist without a brand
     description: '',
     quantity: 0,
     in_stock: 0,
@@ -66,6 +68,7 @@ watch(
             form.title = product.title;
             form.slug = product.slug;
             form.category_id = product.category_id;
+            form.brand_id = product.brand_id ?? null; // null if no brand was assigned
             form.description = product.description;
             form.quantity = product.quantity;
             form.in_stock = product.in_stock;
@@ -154,6 +157,30 @@ const submit = () => {
             <small v-if="form.errors.category_id" class="text-red-500 mt-1 block">{{
                 form.errors.category_id
             }}</small>
+        </div>
+
+        <!--
+        Brand dropdown — optional (brand_id is nullable).
+        optionValue="id"   → form.brand_id stores the integer PK, not the whole object.
+        optionLabel="name" → the visible text in the dropdown options.
+    -->
+        <div class="mb-4">
+            <label class="block mb-2 font-medium text-gray-700 dark:text-gray-200">
+                Brand
+                <span class="text-gray-400 text-sm font-normal">(optional)</span>
+            </label>
+            <Select
+                v-model="form.brand_id"
+                :options="brands"
+                option-value="id"
+                option-label="name"
+                placeholder="Select a brand"
+                class="w-full"
+                :show-clear="true"
+            />
+            <small v-if="form.errors.brand_id" class="text-red-500 mt-1 block">
+                {{ form.errors.brand_id }}
+            </small>
         </div>
 
         <!--

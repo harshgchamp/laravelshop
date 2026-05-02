@@ -1,26 +1,203 @@
-Read claude.md and .claudeignore and update if any need according to project.
+CLAUDE.md + .claudeignore — Updated
 
+  Both files have been updated. CLAUDE.md now documents the full architecture, all models/relationships, cart system, payment flow, AWS deployment target, environment variables, and known gaps. .claudeignore
+  adds IDE files, Pint/PHPUnit caches, and public/build.
 
-Considering the deployment will be on git + aws. (EC2, rds, s3, iam roles, alb and many more)
+  ---
+  Senior Developer Audit (10+ Years Standard)
 
+  What's Done Well
 
- Do a thorough exploration of this Laravel + Inertia + Vue 3 e-commerce admin project at D:\xampp\htdocs\ecommerce-admin. I need a complete architectural audit. Read every important file.
+  Architecture Foundations
+  - Correct resource controller pattern (7 methods, FormRequest injection)
+  - Inertia middleware sharing auth, flash, cart, Ziggy — correct place for this
+  - Dual-cart system (cookie guest → DB on login) is a legitimate pattern, implemented correctly in app/Helper/Cart.php
+  - Spatie Permission for RBAC is the industry standard choice
+  - Spatie Sluggable with unique counter fallback (product-slug-1) is production-quality
+  - DB::transaction() wrapping in UserController — correct for multi-step writes
+  - Authorization check abort_if($order->user_id !== Auth::id(), 403) in AccountOrderController — proper ownership guard
+  - Audit columns (created_by, updated_by, deleted_by) on orders and products — shows awareness
+  - Comprehensive ProductCrudTest (640 lines) — Storage::fake(), actingAs(), assertInertia() — this is senior-quality test code
 
-       Please explore and report on:
+  Tech Stack Choices
+  - Laravel 12 + Inertia 2 is the right modern choice (not API/SPA which adds complexity without benefit for admin panels)
+  - PrimeVue 4 Aura is a strong professional choice — better than rolling custom UI
+  - Ziggy for typed routes on frontend prevents string-literal route bugs
+  - Stripe PHP v19 is current
 
-       1. app/ directory structure — all Controllers, Models, Requests, Middleware, Policies, Services, Observers, Events, Jobs, etc.
-       2. routes/ — all route files (web.php, api.php, etc.)
-       3. database/ — all migrations, seeders, factories
-       4. resources/js/ — Pages, Components, composables, stores (Pinia), layouts
-       5. config/ — any custom config files
-       6. composer.json and package.json — dependencies
-       7. tests/ — any test files present
-       8. Any Service classes, Repositories, DTOs, Actions
-       9. Read at least 3-4 controller files fully
-       10. Read at least 3-4 Vue page files fully
-       11. Read at least 3-4 migration files
-       12. Read the main model files
+  ---
+  What Needs Improvement
 
-       Report everything you find — file structure, code quality, patterns used, what's missing, what's done well. Be very detailed. This is for a senior 10+ year PHP developer evaluation.
-	   
-	   
+  1. No Service Layer (Biggest Gap)
+
+  All business logic lives in controllers. A 10-year dev extracts this:
+
+  // Bad (current): CheckoutController stores order, creates payment, calls Stripe, clears cart
+  // Good: CheckoutController → OrderService::createFromCart() → PaymentService::processStripe()
+
+  Interviewers at 60K+ level will ask: "How do you keep controllers thin?" You need a app/Services/ folder.
+
+  2. BrandController is a Stub
+
+  The Brand model and migration exist but there's no controller, requests, resource, or UI. This looks unfinished.
+
+  3. HandleInertiaRequests Does Too Much
+
+  Cart count + cart items are fetched on every single request (even admin requests don't need cart). This hits the DB unnecessarily. Cart should be lazy or scoped to frontend-only middleware.
+
+  4. Pinia Installed but Never Used
+
+  You installed Pinia 3 but manage everything via Inertia props. That's not wrong for simple state, but there's no cartStore, no authStore. Interviewers will ask about Vue state management — having real Pinia
+  stores demonstrates competence.
+
+  5. No Vue Composables
+
+  ProductForm.vue, CategoryForm.vue, UserForm.vue repeat the same pattern. Real Vue 3 devs extract:
+  // composables/useImageUpload.js
+  // composables/useConfirmDelete.js
+  // composables/useToast.js
+
+  6. No Queue Jobs
+
+  Order confirmation email, Stripe webhook processing — these should be async jobs. No app/Jobs/ folder exists.
+
+  7. No Events/Listeners
+
+  OrderPaid event → SendOrderConfirmation listener, SendAdminNotification listener. This is the Laravel event-driven pattern. No app/Events/ or app/Listeners/ exists.
+
+  8. Local Disk for Files
+
+  All images go to storage/app/public/. This breaks in AWS where EC2 instances don't share a filesystem. Must switch to S3 filesystem driver before deployment.
+
+  9. No Observers
+
+  created_by/updated_by are set manually in each controller. A ProductObserver would handle this automatically and never be forgotten.
+
+  10. No API Layer
+
+  Sanctum is installed but unused. No REST API. If you ever need a mobile app or external integration, you'd have to rebuild routing from scratch. At least a read-only product/category API would be good.
+
+  11. Zero Frontend Tests
+
+  No Vitest, no Cypress, no Playwright. Testing is backend-only.
+
+  12. Dashboard is a Stub
+
+  Dashboard.vue shows nothing useful. No sales charts, no KPIs, no recent orders widget.
+
+  ---
+  30-Day Roadmap to GBP 60K+ Readiness
+
+  This roadmap builds the project features that simultaneously demonstrate the skills interviewers test for.
+
+  ---
+  Week 1 — Service Layer + Brand CRUD + Observers (Laravel Depth)
+
+  Goal: Prove you can architect beyond controllers.
+
+  ┌─────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+  │ Day │                                                          Task                                                          │       Skill Demonstrated        │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 1–2 │ Create app/Services/ProductService.php, CategoryService.php, refactor controllers to delegate                          │ Thin controllers, SRP           │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 3   │ Create app/Observers/ProductObserver.php for created_by/updated_by auto-fill                                           │ Observer pattern                │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 4   │ Complete BrandController + all CRUD UI (copy Category pattern, already understand it)                                  │ Full-stack CRUD fluency         │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 5   │ Create ProductIndexRequest with search + filter (by category, brand, price range), apply query scopes on Product model │ Query scopes, advanced Eloquent │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 6–7 │ Add app/Events/OrderPaid.php + app/Listeners/SendOrderConfirmationEmail.php, queue it                                  │ Events, listeners, queues       │
+  └─────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+
+  ---
+  Week 2 — Queue Jobs + Email + Admin Orders (Laravel Advanced)
+
+  Goal: Async Laravel — the feature that separates mid from senior.
+
+  ┌───────┬────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────┐
+  │  Day  │                                              Task                                              │      Skill Demonstrated       │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ 8–9   │ Set up Laravel queues (database driver), create SendOrderConfirmation Mailable + Job           │ Queues, Mailables, Jobs       │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ 10    │ Create admin OrderController — list all orders, update status (pending/paid/shipped/cancelled) │ Admin resource management     │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ 11    │ Add order_status_history table + model, log every status change via Observer                   │ State machine pattern         │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ 12    │ Create OrderResource + OrderItemResource transformers, use in admin views                      │ API Resources                 │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ 13–14 │ Write feature tests for OrderController and queue dispatch (Queue::fake())                     │ Advanced testing, Queue::fake │
+  └───────┴────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────┘
+
+  ---
+  Week 3 — Vue 3 Depth + Pinia + Dashboard (Frontend Depth)
+
+  Goal: Show Vue 3 mastery — composables, stores, real reactive patterns.
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+  │  Day  │                                                     Task                                                     │       Skill Demonstrated        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 15–16 │ Create stores/cartStore.js (Pinia), migrate cart state out of Inertia props                                  │ Pinia, state management         │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 17    │ Create composables: useImageUpload.js, useConfirmDelete.js, useToast.js                                      │ Vue 3 composables               │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 18–19 │ Build Dashboard page: total revenue, orders by status (DataTable), top products (Chart.js or PrimeVue Chart) │ Data viz, frontend architecture │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 20–21 │ Add product search with debounce on admin index (Inertia router.get() with preserveState)                    │ Inertia advanced, debounce      │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+
+  ---
+  Week 4 — AWS Deployment + CI/CD + S3 (DevOps Credibility)
+
+  Goal: Ship it to AWS. This alone makes you stand out from 80% of Laravel devs applying for 60K roles.
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────┬────────────────────────────────────┐
+  │  Day  │                                             Task                                             │         Skill Demonstrated         │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 22    │ Switch filesystem to S3 (config/filesystems.php), update image store/delete in services      │ S3 filesystem driver, AWS SDK      │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 23    │ Set up AWS: EC2 (Ubuntu 22.04), RDS MySQL, S3 bucket, IAM role for EC2 → S3 (no static keys) │ IAM, EC2, RDS, S3                  │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 24    │ Configure Nginx + PHP-FPM + Supervisor on EC2, deploy manually first                         │ Linux server admin                 │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 25    │ Set up ALB + ACM certificate for HTTPS, point domain                                         │ ALB, ACM, Route 53                 │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 26–27 │ Write .github/workflows/deploy.yml — tests → build → SSH deploy on main push                 │ GitHub Actions CI/CD               │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 28    │ Configure Horizon or Supervisor for queue workers on EC2                                     │ Laravel Horizon, production queues │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────────┤
+  │ 29–30 │ Set up CloudWatch alarms (CPU, RDS connections), store .env in AWS Parameter Store           │ Monitoring, secrets management     │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────┴────────────────────────────────────┘
+
+  ---
+  What You Can Say in a 60K Interview
+
+  After this month, you can answer:
+
+  ┌───────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │                 Question                  │                                                  Your Answer                                                  │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How do you keep controllers thin?"       │ Service layer — ProductService, OrderService with injected dependencies                                       │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How do you handle async work?"           │ Laravel queues with database/SQS driver, OrderConfirmation job dispatched after payment                       │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How do you manage state in Vue?"         │ Pinia stores for cross-component state, Inertia shared props for server-auth state                            │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How do you test queues?"                 │ Queue::fake() in feature tests, assert dispatched with correct payload                                        │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How is your app deployed?"               │ GitHub Actions CI → EC2 via SSH, RDS for MySQL, S3 for media, ALB + ACM for HTTPS, IAM roles (no static keys) │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "How do you store secrets in production?" │ AWS Parameter Store, not .env in the repo                                                                     │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "What's your S3 setup?"                   │ Laravel S3 filesystem driver, EC2 instance IAM role for S3 access, CloudFront CDN in front                    │
+  ├───────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ "Do you write tests?"                     │ Feature tests with RefreshDatabase, Storage::fake(), Queue::fake(), 80%+ controller coverage                  │
+  └───────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  Summary
+
+  Current Level: Strong mid-level (6.5/10 senior scale). Solid fundamentals, clean code, good test coverage on core features. The product CRUD tests alone show discipline.
+
+  What's Missing for 60K+: Service layer, async jobs, Vue composables, real Pinia stores, AWS deployment experience.
+
+  CLAUDE.md and .claudeignore have been updated to reflect the full architecture, AWS target, environment variables, and all known gaps.

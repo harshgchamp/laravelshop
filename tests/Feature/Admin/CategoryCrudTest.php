@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -115,17 +114,17 @@ class CategoryCrudTest extends TestCase
     {
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'        => 'Electronics',
+                'name' => 'Electronics',
                 'description' => 'All electronic items',
-                'status'      => true,
+                'status' => true,
             ]);
 
         $response->assertRedirect(route('admin.categories.index'))
             ->assertSessionHas('success', 'Category created successfully');
 
         $this->assertDatabaseHas('categories', [
-            'name'   => 'Electronics',
-            'slug'   => 'electronics',
+            'name' => 'Electronics',
+            'slug' => 'electronics',
             'status' => true,
         ]);
     }
@@ -134,7 +133,7 @@ class CategoryCrudTest extends TestCase
     {
         $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Home & Garden',
+                'name' => 'Home & Garden',
                 'status' => true,
             ]);
 
@@ -150,7 +149,7 @@ class CategoryCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Books',
+                'name' => 'Books',
                 'status' => true,
             ]);
 
@@ -163,9 +162,9 @@ class CategoryCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Furniture',
+                'name' => 'Furniture',
                 'status' => true,
-                'image'  => UploadedFile::fake()->image('chair.jpg'),
+                'image' => UploadedFile::fake()->image('chair.jpg'),
             ]);
 
         $category = Category::where('name', 'Furniture')->firstOrFail();
@@ -188,7 +187,7 @@ class CategoryCrudTest extends TestCase
     {
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => str_repeat('A', 256),
+                'name' => str_repeat('A', 256),
                 'status' => true,
             ]);
 
@@ -201,9 +200,9 @@ class CategoryCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Valid Name',
+                'name' => 'Valid Name',
                 'status' => true,
-                'image'  => UploadedFile::fake()->create('document.pdf', 500, 'application/pdf'),
+                'image' => UploadedFile::fake()->create('document.pdf', 500, 'application/pdf'),
             ]);
 
         $response->assertSessionHasErrors('image');
@@ -215,9 +214,9 @@ class CategoryCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Valid Name',
+                'name' => 'Valid Name',
                 'status' => true,
-                'image'  => UploadedFile::fake()->image('large.jpg')->size(2049),
+                'image' => UploadedFile::fake()->image('large.jpg')->size(2049),
             ]);
 
         $response->assertSessionHasErrors('image');
@@ -227,7 +226,7 @@ class CategoryCrudTest extends TestCase
     {
         $response = $this->actingAs($this->adminUser())
             ->post(route('admin.categories.store'), [
-                'name'   => 'Minimal Category',
+                'name' => 'Minimal Category',
                 'status' => true,
             ]);
 
@@ -283,9 +282,9 @@ class CategoryCrudTest extends TestCase
 
         $response = $this->actingAs($this->adminUser())
             ->put(route('admin.categories.update', $category), [
-                'name'        => 'New Name',
+                'name' => 'New Name',
                 'description' => 'Updated description',
-                'status'      => false,
+                'status' => false,
             ]);
 
         $response->assertRedirect(route('admin.categories.index'))
@@ -305,7 +304,7 @@ class CategoryCrudTest extends TestCase
         // Rename catA to same name as catA — slug should stay 'alpha', not 'alpha-1'
         $this->actingAs($this->adminUser())
             ->put(route('admin.categories.update', $catA), [
-                'name'   => 'Alpha',
+                'name' => 'Alpha',
                 'status' => true,
             ]);
 
@@ -323,9 +322,9 @@ class CategoryCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->put(route('admin.categories.update', $category), [
-                'name'   => $category->name,
+                'name' => $category->name,
                 'status' => true,
-                'image'  => UploadedFile::fake()->image('new-image.jpg'),
+                'image' => UploadedFile::fake()->image('new-image.jpg'),
             ]);
 
         Storage::disk('public')->assertMissing($oldPath);
@@ -343,7 +342,7 @@ class CategoryCrudTest extends TestCase
 
         $this->actingAs($this->adminUser())
             ->put(route('admin.categories.update', $category), [
-                'name'   => $category->name,
+                'name' => $category->name,
                 'status' => true,
             ]);
 
@@ -382,7 +381,7 @@ class CategoryCrudTest extends TestCase
 
     public function test_soft_deleted_category_not_visible_in_index(): void
     {
-        $active  = Category::factory()->create(['name' => 'Visible']);
+        $active = Category::factory()->create(['name' => 'Visible']);
         $deleted = Category::factory()->create(['name' => 'Hidden']);
         $deleted->delete();
 
@@ -392,8 +391,7 @@ class CategoryCrudTest extends TestCase
         $response->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Categories/Index')
-                ->where('categories.data', fn ($data) =>
-                    collect($data)->contains('name', 'Visible') &&
+                ->where('categories.data', fn ($data) => collect($data)->contains('name', 'Visible') &&
                     ! collect($data)->contains('name', 'Hidden')
                 )
             );
