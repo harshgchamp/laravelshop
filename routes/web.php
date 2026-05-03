@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
@@ -41,6 +42,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('users', UserController::class);
         Route::resource('permissions', PermissionController::class)->except('create', 'show', 'edit');
         Route::resource('products', ProductController::class);
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 
 Route::get('/', [HomeController::class, 'index'])->name('home');

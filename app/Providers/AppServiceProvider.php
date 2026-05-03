@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
+use App\Observers\BrandObserver;
+use App\Observers\CategoryObserver;
 use App\Observers\ProductObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -37,5 +41,7 @@ class AppServiceProvider extends ServiceProvider
         // This is the single registration point — creating/updating/deleting hooks are
         // handled automatically from here on, project-wide.
         Product::observe(ProductObserver::class);
+        Category::observe(CategoryObserver::class);
+        Brand::observe(BrandObserver::class);
     }
 }
